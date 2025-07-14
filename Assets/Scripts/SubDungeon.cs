@@ -1,70 +1,72 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SubDungeon 
+public class SubDungeon
 {
-    public SubDungeon Left, Right;
-    public Rect Rect;
-    public Rect Room = new Rect(-1, -1, 0, 0); // i.e null
-    public List<Rect> Corridors = new();
+    public SubDungeon LeftChild => _leftChild;
+    public SubDungeon RightChild => _rightChild;
+    public Rect Rect => _rect;
+    public Rect Room => _room;
+    public List<Rect> Corridors => _corridors;
+    
+    private SubDungeon _leftChild, _rightChild;
+    private Rect _rect;
+    private Rect _room = new Rect(-1, -1, 0, 0); // i.e null
+    private List<Rect> _corridors = new();
 
+    /// <summary>
+    /// Constructor.
+    /// </summary>
+    /// <param name="rect">The dimensions of the dungeon.</param>
     public SubDungeon(Rect rect)
     {
-        this.Rect = rect;
+        this._rect = rect;
     }
 
+    /// <summary>
+    /// Checks if the subspace is a leaf in the BSP tree, i.e. whether it has any children.
+    /// </summary>
+    /// <returns>true if the node has no children; false otherwise.</returns>
     public bool IsLeaf()
     {
-        return Left == null && Right == null;
+        return _leftChild == null && _rightChild == null;
     }
 
     public bool Split(int minRoomSize, int maxRoomSize)
     {
-        if (!IsLeaf())
-        {
-            return false;
-        }
+        if (!IsLeaf()) return false;
 
         // choose a vertical or horizontal split depending on the proportions
         // i.e. if too wide split vertically, or too long horizontally, 
         // or if nearly square choose vertical or horizontal at random
         bool splitHorizontally;
 
-        if (Rect.width / Rect.height >= 1.25)
-        {
+        if (_rect.width / _rect.height >= 1.25)
             splitHorizontally = false;
-        }
-        else if (Rect.height / Rect.width >= 1.25)
-        {
+        else if (_rect.height / _rect.width >= 1.25)
             splitHorizontally = true;
-        }
         else
-        {
             splitHorizontally = Random.Range(0.0f, 1.0f) > 0.5;
-        }
 
-        if (Mathf.Min(Rect.height, Rect.width) / 2 < minRoomSize)
-        {
-            return false;
-        }
+        if (Mathf.Min(_rect.height, _rect.width) / 2 < minRoomSize) return false;
 
         if (splitHorizontally)
         {
             // split so that the resulting sub-dungeons widths are not too small
             // (since we are splitting horizontally) 
-            int split = Random.Range(minRoomSize, (int)(Rect.width - minRoomSize));
+            int split = Random.Range(minRoomSize, (int)(_rect.width - minRoomSize));
 
-            Left = new SubDungeon(new Rect(Rect.x, Rect.y, Rect.width, split));
-            Right = new SubDungeon(
-                new Rect(Rect.x, Rect.y + split, Rect.width, Rect.height - split));
+            _leftChild = new SubDungeon(new Rect(_rect.x, _rect.y, _rect.width, split));
+            _rightChild = new SubDungeon(
+                new Rect(_rect.x, _rect.y + split, _rect.width, _rect.height - split));
         }
         else
         {
-            int split = Random.Range(minRoomSize, (int)(Rect.height - minRoomSize));
+            int split = Random.Range(minRoomSize, (int)(_rect.height - minRoomSize));
 
-            Left = new SubDungeon(new Rect(Rect.x, Rect.y, split, Rect.height));
-            Right = new SubDungeon(
-                new Rect(Rect.x + split, Rect.y, Rect.width - split, Rect.height));
+            _leftChild = new SubDungeon(new Rect(_rect.x, _rect.y, split, _rect.height));
+            _rightChild = new SubDungeon(
+                new Rect(_rect.x + split, _rect.y, _rect.width - split, _rect.height));
         }
 
         return true;
@@ -72,35 +74,25 @@ public class SubDungeon
 
     public void CreateRoom()
     {
-        if (Left != null)
-        {
-            Left.CreateRoom();
-        }
+        _leftChild?.CreateRoom();
+        _rightChild?.CreateRoom();
 
-        if (Right != null)
-        {
-            Right.CreateRoom();
-        }
-
-        if (Left != null && Right != null)
-        {
-            CreateCorridorBetween(Left, Right);
-        }
+        if (_leftChild != null && _rightChild != null)
+            CreateCorridorBetween(_leftChild, _rightChild);
 
         if (IsLeaf())
         {
-            int roomWidth = (int)Random.Range(Rect.width / 2, Rect.width - 2);
-            int roomHeight = (int)Random.Range(Rect.height / 2, Rect.height - 2);
-            int roomX = (int)Random.Range(1, Rect.width - roomWidth - 1);
-            int roomY = (int)Random.Range(1, Rect.height - roomHeight - 1);
+            int roomWidth = (int)Random.Range(_rect.width / 2, _rect.width - 2);
+            int roomHeight = (int)Random.Range(_rect.height / 2, _rect.height - 2);
+            int roomX = (int)Random.Range(1, _rect.width - roomWidth - 1);
+            int roomY = (int)Random.Range(1, _rect.height - roomHeight - 1);
 
             // room position will be absolute in the board, not relative to the sub-dungeon
-            Room = new Rect(Rect.x + roomX, Rect.y + roomY, roomWidth, roomHeight);
+            _room = new Rect(_rect.x + roomX, _rect.y + roomY, roomWidth, roomHeight);
         }
     }
-
-
-    public void CreateCorridorBetween(SubDungeon left, SubDungeon right)
+    
+    private void CreateCorridorBetween(SubDungeon left, SubDungeon right)
     {
         Rect leftRoom = left.GetRoom();
         Rect rightRoom = right.GetRoom();
@@ -113,11 +105,8 @@ public class SubDungeon
 
         // always be sure that left point is on the left to simplify the code
         if (leftPoint.x > rightPoint.x)
-        {
-            Vector2 temp = leftPoint;
-            leftPoint = rightPoint;
-            rightPoint = temp;
-        }
+            //Swap via deconstruction.
+            (leftPoint, rightPoint) = (rightPoint, leftPoint);
 
         int width = (int)(leftPoint.x - rightPoint.x);
         int height = (int)(leftPoint.y - rightPoint.y);
@@ -129,75 +118,51 @@ public class SubDungeon
             if (Random.Range(0, 1) > 2)
             {
                 // add a corridor to the right
-                Corridors.Add(new Rect(leftPoint.x, leftPoint.y, Mathf.Abs(width) + 1, 1));
+                _corridors.Add(new Rect(leftPoint.x, leftPoint.y, Mathf.Abs(width) + 1, 1));
 
                 // if left point is below right point go up
                 // otherwise go down
-                if (height < 0)
-                {
-                    Corridors.Add(new Rect(rightPoint.x, leftPoint.y, 1, Mathf.Abs(height)));
-                }
-                else
-                {
-                    Corridors.Add(new Rect(rightPoint.x, leftPoint.y, 1, -Mathf.Abs(height)));
-                }
+                _corridors.Add(height < 0
+                    ? new Rect(rightPoint.x, leftPoint.y, 1, Mathf.Abs(height)) 
+                    : new Rect(rightPoint.x, leftPoint.y, 1, -Mathf.Abs(height)));
             }
             else
             {
                 // go up or down
-                if (height < 0)
-                {
-                    Corridors.Add(new Rect(leftPoint.x, leftPoint.y, 1, Mathf.Abs(height)));
-                }
-                else
-                {
-                    Corridors.Add(new Rect(leftPoint.x, rightPoint.y, 1, Mathf.Abs(height)));
-                }
+                _corridors.Add(height < 0
+                    ? new Rect(leftPoint.x, leftPoint.y, 1, Mathf.Abs(height))
+                    : new Rect(leftPoint.x, rightPoint.y, 1, Mathf.Abs(height)));
 
                 // then go right
-                Corridors.Add(new Rect(leftPoint.x, rightPoint.y, Mathf.Abs(width) + 1, 1));
+                _corridors.Add(new Rect(leftPoint.x, rightPoint.y, Mathf.Abs(width) + 1, 1));
             }
         }
         else
         {
             // if the points are aligned horizontally
             // go up or down depending on the positions
-            if (height < 0)
-            {
-                Corridors.Add(new Rect((int)leftPoint.x, (int)leftPoint.y, 1, Mathf.Abs(height)));
-            }
-            else
-            {
-                Corridors.Add(new Rect((int)rightPoint.x, (int)rightPoint.y, 1, Mathf.Abs(height)));
-            }
+            _corridors.Add(height < 0
+                ? new Rect((int)leftPoint.x, (int)leftPoint.y, 1, Mathf.Abs(height))
+                : new Rect((int)rightPoint.x, (int)rightPoint.y, 1, Mathf.Abs(height)));
         }
     }
 
-    public Rect GetRoom()
+    private Rect GetRoom()
     {
-        if (IsLeaf())
+        if (IsLeaf()) return _room;
+
+        if (_leftChild != null)
         {
-            return Room;
+            Rect leftRoom = _leftChild.GetRoom();
+
+            if (!Mathf.Approximately(leftRoom.x, -1)) return leftRoom;
         }
 
-        if (Left != null)
+        if (_rightChild != null)
         {
-            Rect leftRoom = Left.GetRoom();
+            Rect rightRoom = _rightChild.GetRoom();
 
-            if (leftRoom.x != -1)
-            {
-                return leftRoom;
-            }
-        }
-
-        if (Right != null)
-        {
-            Rect rightRoom = Right.GetRoom();
-
-            if (rightRoom.x != -1)
-            {
-                return rightRoom;
-            }
+            if (!Mathf.Approximately(rightRoom.x, -1)) return rightRoom;
         }
 
         // workaround non-nullable structs

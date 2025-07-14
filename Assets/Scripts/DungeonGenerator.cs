@@ -2,51 +2,58 @@ using UnityEngine;
 
 public class DungeonGenerator : MonoBehaviour
 {
-    [SerializeField] private int dungeonRows;
-    [SerializeField] private int dungeonColumns;
-    [SerializeField] private int minRoomSize; 
-    [SerializeField] private int maxRoomSize;
+    [SerializeField] private int dungeonRows = 50;
+    [SerializeField] private int dungeonColumns = 50;
+    [SerializeField] private int minRoomSize = 10; 
+    [SerializeField] private int maxRoomSize = 20;
     
     [SerializeField] private GameObject floorTilePrefab;
     [SerializeField] private GameObject corridorTilePrefab;
 
-    private GameObject[,] _boardPositionsFloor;
+    private GameObject[,] _dungeon;
 
+    /// <summary>
+    /// Main entry point of the program - the flow of the BSP algorithm.
+    /// </summary>
     private void Start()
     {
+        // Create the main room (root node in the BSP tree) that takes up the whole size of the dungeon.
         SubDungeon rootSubDungeon = new SubDungeon(new Rect(0, 0, dungeonRows, dungeonColumns));
+        
+        // Recursively partition the root node.
         Partition(rootSubDungeon);
+        
+        // Create rooms for every subspace.
         rootSubDungeon.CreateRoom();
 
-        _boardPositionsFloor = new GameObject[dungeonRows, dungeonColumns];
+        // Create a dungeon GameObject.
+        _dungeon = new GameObject[dungeonRows, dungeonColumns];
+        
+        // Draw rooms and corridors.
         DrawRooms(rootSubDungeon);
         DrawCorridors(rootSubDungeon);
     }
 
     private void Partition(SubDungeon subDungeon)
     {
-        if (subDungeon.IsLeaf())
+        if (!subDungeon.IsLeaf()) return;
+        
+        // if the sub-dungeon is too large split it
+        if (subDungeon.Rect.width > maxRoomSize
+            || subDungeon.Rect.height > maxRoomSize
+            || Random.Range(0.0f, 1.0f) > 0.25)
         {
-            // if the sub-dungeon is too large split it
-            if (subDungeon.Rect.width > maxRoomSize
-                || subDungeon.Rect.height > maxRoomSize
-                || Random.Range(0.0f, 1.0f) > 0.25)
+            if (subDungeon.Split(minRoomSize, maxRoomSize))
             {
-                if (subDungeon.Split(minRoomSize, maxRoomSize))
-                {
-                    Partition(subDungeon.Left);
-                    Partition(subDungeon.Right);
-                }
+                Partition(subDungeon.LeftChild);
+                Partition(subDungeon.RightChild);
             }
         }
     }
 
     private void DrawRooms(SubDungeon subDungeon)
     {
-        if (subDungeon == null)
-        {
-            return;
-        }
+        if (subDungeon == null) return;
 
         if (subDungeon.IsLeaf())
         {
@@ -57,26 +64,24 @@ public class DungeonGenerator : MonoBehaviour
                     GameObject instance =
                         Instantiate(floorTilePrefab, new Vector3(i, j, 0f), Quaternion.identity) as GameObject;
                     instance.transform.SetParent(transform);
-                    _boardPositionsFloor[i, j] = instance;
+                    
+                    _dungeon[i, j] = instance;
                 }
             }
         }
         else
         {
-            DrawRooms(subDungeon.Left);
-            DrawRooms(subDungeon.Right);
+            DrawRooms(subDungeon.LeftChild);
+            DrawRooms(subDungeon.RightChild);
         }
     }
 
-    void DrawCorridors(SubDungeon subDungeon)
+    private void DrawCorridors(SubDungeon subDungeon)
     {
-        if (subDungeon == null)
-        {
-            return;
-        }
+        if (subDungeon == null) return;
 
-        DrawCorridors(subDungeon.Left);
-        DrawCorridors(subDungeon.Right);
+        DrawCorridors(subDungeon.LeftChild);
+        DrawCorridors(subDungeon.RightChild);
 
         foreach (Rect corridor in subDungeon.Corridors)
         {
@@ -84,12 +89,12 @@ public class DungeonGenerator : MonoBehaviour
             {
                 for (int j = (int)corridor.y; j < corridor.yMax; j++)
                 {
-                    if (_boardPositionsFloor[i, j] == null)
+                    if (_dungeon[i, j] == null)
                     {
                         GameObject instance =
                             Instantiate(corridorTilePrefab, new Vector3(i, j, 0f), Quaternion.identity) as GameObject;
                         instance.transform.SetParent(transform);
-                        _boardPositionsFloor[i, j] = instance;
+                        _dungeon[i, j] = instance;
                     }
                 }
             }
