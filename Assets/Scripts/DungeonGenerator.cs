@@ -1,68 +1,94 @@
 using UnityEngine;
 
+/// <summary>
+/// Handles procedural generation of a dungeon using the Binary Space Partitioning (BSP) algorithm.
+/// Performs the following steps:
+/// 1. Recursively splits the map space into smaller subregions.
+/// 2. Creates a room in each leaf node.
+/// 3. Connects the rooms using corridors.
+/// 4. Instantiates floor and corridor tiles in the scene.
+/// </summary>
 public class DungeonGenerator : MonoBehaviour
 {
+    [Header("Dungeon Size")]
     [SerializeField] private int dungeonRows = 50;
     [SerializeField] private int dungeonColumns = 50;
+    
+    [Header("Room Settings")]
     [SerializeField] private int minRoomSize = 10; 
     [SerializeField] private int maxRoomSize = 20;
     
+    [Header("Prefabs")]
     [SerializeField] private GameObject floorTilePrefab;
     [SerializeField] private GameObject corridorTilePrefab;
 
     private GameObject[,] _dungeon;
 
+    // 25% chance to split. Adds variety
+    private const float SplitChanceThreshold = 0.75f;
+
     /// <summary>
-    /// Main entry point of the program - the flow of the BSP algorithm.
+    /// Main entry point — starts BSP dungeon generation.
     /// </summary>
     private void Start()
     {
         // Create the main room (root node in the BSP tree) that takes up the whole size of the dungeon.
-        SubDungeon rootSubDungeon = new SubDungeon(new Rect(0, 0, dungeonRows, dungeonColumns));
+        BSPNode rootNode = new BSPNode(new Rect(0, 0, dungeonRows, dungeonColumns));
         
-        // Recursively partition the root node.
-        Partition(rootSubDungeon);
+        // Recursively partition the dungeon space.
+        Partition(rootNode);
         
-        // Create rooms for every subspace.
-        rootSubDungeon.CreateRoom();
+        // Create rooms inside each node.
+        rootNode.CreateRoom();
 
-        // Create a dungeon GameObject.
+        // Initialize the dungeon GameObject.
         _dungeon = new GameObject[dungeonRows, dungeonColumns];
         
         // Draw rooms and corridors.
-        DrawRooms(rootSubDungeon);
-        DrawCorridors(rootSubDungeon);
+        DrawRooms(rootNode);
+        DrawCorridors(rootNode);
     }
 
-    private void Partition(SubDungeon subDungeon)
+    /// <summary>
+    /// Starting from the root node, recursively partitions the space into
+    /// subspaces (sub-dungeons) until a leaf node is reached. 
+    /// </summary>
+    /// <param name="node">The subspace (BSP node) that will be partitioned.</param>
+    private void Partition(BSPNode node)
     {
-        if (!subDungeon.IsLeaf()) return;
+        if (!node.IsLeaf()) return;
         
-        // if the sub-dungeon is too large split it
-        if (subDungeon.Rect.width > maxRoomSize
-            || subDungeon.Rect.height > maxRoomSize
-            || Random.Range(0.0f, 1.0f) > 0.25)
+        // Check if node should be split (either too big or randomly decided)
+        if (node.Rect.width > maxRoomSize      
+            || node.Rect.height > maxRoomSize
+            || Random.Range(0.0f, 1.0f) > SplitChanceThreshold) 
         {
-            if (subDungeon.Split(minRoomSize, maxRoomSize))
+            // If the sub-dungeon was successfully split, proceed to recursively partition its children
+            if (node.Split(minRoomSize))
             {
-                Partition(subDungeon.LeftChild);
-                Partition(subDungeon.RightChild);
+                Partition(node.LeftChild);
+                Partition(node.RightChild);
             }
         }
     }
 
-    private void DrawRooms(SubDungeon subDungeon)
+    /// <summary>
+    /// Recursively instantiates floor tile GameObjects for each room.
+    /// </summary>
+    /// <param name="node">The node to start drawing rooms from.</param>
+    private void DrawRooms(BSPNode node)
     {
-        if (subDungeon == null) return;
+        if (node == null) return;
 
-        if (subDungeon.IsLeaf())
+        if (node.IsLeaf())
         {
-            for (int i = (int)subDungeon.Room.x; i < subDungeon.Room.xMax; i++)
+            for (int i = (int)node.Room.x; i < node.Room.xMax; i++)
             {
-                for (int j = (int)subDungeon.Room.y; j < subDungeon.Room.yMax; j++)
+                for (int j = (int)node.Room.y; j < node.Room.yMax; j++)
                 {
+                    // Instantiate GameObject
                     GameObject instance =
-                        Instantiate(floorTilePrefab, new Vector3(i, j, 0f), Quaternion.identity) as GameObject;
+                        Instantiate(floorTilePrefab, new Vector3(i, j, 0f), Quaternion.identity);
                     instance.transform.SetParent(transform);
                     
                     _dungeon[i, j] = instance;
@@ -71,31 +97,37 @@ public class DungeonGenerator : MonoBehaviour
         }
         else
         {
-            DrawRooms(subDungeon.LeftChild);
-            DrawRooms(subDungeon.RightChild);
+            DrawRooms(node.LeftChild);
+            DrawRooms(node.RightChild);
         }
     }
 
-    private void DrawCorridors(SubDungeon subDungeon)
+    /// <summary>
+    /// Recursively instantiates corridor tile GameObjects for each corridor in the BSP tree.
+    /// Only instantiates corridor tiles if no tile already exists at the position.
+    /// </summary>
+    /// <param name="node">The node to start drawing corridors from.</param>
+    private void DrawCorridors(BSPNode node)
     {
-        if (subDungeon == null) return;
+        if (node == null) return;
 
-        DrawCorridors(subDungeon.LeftChild);
-        DrawCorridors(subDungeon.RightChild);
+        DrawCorridors(node.LeftChild);
+        DrawCorridors(node.RightChild);
 
-        foreach (Rect corridor in subDungeon.Corridors)
+        foreach (Rect corridor in node.Corridors)
         {
             for (int i = (int)corridor.x; i < corridor.xMax; i++)
             {
                 for (int j = (int)corridor.y; j < corridor.yMax; j++)
                 {
-                    if (_dungeon[i, j] == null)
-                    {
-                        GameObject instance =
-                            Instantiate(corridorTilePrefab, new Vector3(i, j, 0f), Quaternion.identity) as GameObject;
-                        instance.transform.SetParent(transform);
-                        _dungeon[i, j] = instance;
-                    }
+                    if (_dungeon[i, j] != null) continue;
+                    
+                    // Instantiate GameObject
+                    GameObject instance =
+                        Instantiate(corridorTilePrefab, new Vector3(i, j, 0f), Quaternion.identity);
+                    instance.transform.SetParent(transform);
+                        
+                    _dungeon[i, j] = instance;
                 }
             }
         }
