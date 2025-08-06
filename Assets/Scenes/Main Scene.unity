@@ -273,7 +273,7 @@ MonoBehaviour:
   movementEdgeThreshold: 10
   zoomSpeed: 5
   minZoom: 5
-  maxZoom: 20
+  maxZoom: 50
 --- !u!1 &619394800
 GameObject:
   m_ObjectHideFlags: 0
@@ -387,8 +387,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 92cef5e7be62c4ec4a13effae506a6fc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dungeonRows: 50
-  dungeonColumns: 100
+  dungeonRows: 70
+  dungeonColumns: 50
   minRoomSize: 10
   maxRoomSize: 15
   floorTilePrefab: {fileID: 741796142995102789, guid: 89d830a780cf64bf298b0d4368e9a7fd, type: 3}
