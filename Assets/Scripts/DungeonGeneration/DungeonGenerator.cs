@@ -36,13 +36,13 @@ namespace DungeonGeneration
         private void Start()
         {
             // Create the main room (root node in the BSP tree) that takes up the whole size of the dungeon.
-            Node rootNode = new Node(new Rect(0, 0, dungeonRows, dungeonColumns));
+            BSPNode rootNode = new BSPNode(new Rect(0, 0, dungeonRows, dungeonColumns));
         
             // Recursively partition the dungeon space.
             Partition(rootNode);
         
             // Create rooms inside each node.
-            rootNode.CreateRoom();
+            rootNode.CreateRooms();
 
             // Initialize the dungeon GameObject.
             _dungeon = new GameObject[dungeonRows, dungeonColumns];
@@ -57,7 +57,7 @@ namespace DungeonGeneration
         /// subspaces (sub-dungeons) until a leaf node is reached. 
         /// </summary>
         /// <param name="node">The subspace (BSP node) that will be partitioned.</param>
-        private void Partition(Node node)
+        private void Partition(BSPNode node)
         {
             if (!node.IsLeaf()) return;
         
@@ -79,7 +79,7 @@ namespace DungeonGeneration
         /// Recursively instantiates floor tile GameObjects for each room.
         /// </summary>
         /// <param name="node">The node to start drawing rooms from.</param>
-        private void DrawRooms(Node node)
+        private void DrawRooms(BSPNode node)
         {
             if (node == null) return;
 
@@ -110,7 +110,7 @@ namespace DungeonGeneration
         /// Only instantiates corridor tiles if no tile already exists at the position.
         /// </summary>
         /// <param name="node">The node to start drawing corridors from.</param>
-        private void DrawCorridors(Node node)
+        private void DrawCorridors(BSPNode node)
         {
             if (node == null) return;
 

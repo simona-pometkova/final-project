@@ -8,16 +8,16 @@ namespace DungeonGeneration.BinarySpacePartitioning
     /// Each node either holds a rectangular room (leaf) or is split into two child nodes (internal).
     /// The BSP tree structure is used to recursively subdivide space, generate rooms, and connect them with corridors.
     /// </summary>
-    public class Node
+    public class BSPNode
     {
         // Getters
-        public Node LeftChild => _leftChild;
-        public Node RightChild => _rightChild;
+        public BSPNode LeftChild => _leftChild;
+        public BSPNode RightChild => _rightChild;
         public Rect Rect => _rect;
         public Rect Room => _room;
         public List<Rect> Corridors => _corridors;
         
-        private Node _leftChild, _rightChild;
+        private BSPNode _leftChild, _rightChild;
         private Rect _rect;
         private Rect _room = new Rect(-1, -1, 0, 0); // I.e. null
         private List<Rect> _corridors = new();
@@ -34,7 +34,7 @@ namespace DungeonGeneration.BinarySpacePartitioning
         /// Constructor.
         /// </summary>
         /// <param name="rect">The dimensions of the node.</param>
-        public Node(Rect rect)
+        public BSPNode(Rect rect)
         {
             this._rect = rect;
         }
@@ -79,16 +79,16 @@ namespace DungeonGeneration.BinarySpacePartitioning
                 // Split so that the resulting sub-dungeons widths are not too small
                 int split = Random.Range(minRoomSize, (int)(_rect.width - minRoomSize));
 
-                _leftChild = new Node(new Rect(_rect.x, _rect.y, _rect.width, split));
-                _rightChild = new Node(
+                _leftChild = new BSPNode(new Rect(_rect.x, _rect.y, _rect.width, split));
+                _rightChild = new BSPNode(
                     new Rect(_rect.x, _rect.y + split, _rect.width, _rect.height - split));
             }
             else // Split vertically
             {
                 int split = Random.Range(minRoomSize, (int)(_rect.height - minRoomSize));
 
-                _leftChild = new Node(new Rect(_rect.x, _rect.y, split, _rect.height));
-                _rightChild = new Node(
+                _leftChild = new BSPNode(new Rect(_rect.x, _rect.y, split, _rect.height));
+                _rightChild = new BSPNode(
                     new Rect(_rect.x + split, _rect.y, _rect.width - split, _rect.height));
             }
 
@@ -99,11 +99,11 @@ namespace DungeonGeneration.BinarySpacePartitioning
         /// Recursively creates rooms in each node of the BSP tree,
         /// and connects sibling nodes with corridors.
         /// </summary>
-        public void CreateRoom()
+        public void CreateRooms()
         {
             // If the node has children, create rooms inside them too
-            _leftChild?.CreateRoom();
-            _rightChild?.CreateRoom();
+            _leftChild?.CreateRooms();
+            _rightChild?.CreateRooms();
 
             // If both children exist, create a connection (corridor) between them
             if (_leftChild != null && _rightChild != null)
@@ -130,7 +130,7 @@ namespace DungeonGeneration.BinarySpacePartitioning
         /// </summary>
         /// <param name="left">The BSP node representing the first room.</param>
         /// <param name="right">The BSP node representing the second room.</param>
-        private void CreateCorridorBetween(Node left, Node right)
+        private void CreateCorridorBetween(BSPNode left, BSPNode right)
         {
             Rect leftRoom = left.GetRoom();
             Rect rightRoom = right.GetRoom();
@@ -187,7 +187,7 @@ namespace DungeonGeneration.BinarySpacePartitioning
         /// Recursively retrieves the first valid room (Rect) contained within this BSP node or its children.
         /// </summary>
         /// <returns>The first valid room Rect found in this node or its children. Null room if no rooms exist.</returns>
-        private Rect GetRoom()
+        public Rect GetRoom()
         {
             if (IsLeaf()) return _room;
 
@@ -205,6 +205,26 @@ namespace DungeonGeneration.BinarySpacePartitioning
 
             // No room is found - workaround non-nullable struct
             return new Rect(-1, -1, 0, 0);
+        }
+
+        /// <summary>
+        /// Recursively traverses the BSP tree and returns all leaf nodes.
+        /// </summary>
+        /// <returns>A list containing all leaf nodes in the BSP subtree rooted at this node.</returns>
+        public List<BSPNode> GetLeafNodes()
+        {
+            List<BSPNode> leaves = new();
+
+            // If this node is a leaf, add it to the list.
+            if (IsLeaf()) leaves.Add(this);
+            else
+            {
+                // This node is not a leaf - traverse its children and get the leaf nodes inside of them.
+                if (_leftChild != null) leaves.AddRange(_leftChild.GetLeafNodes());
+                if (_rightChild != null) leaves.AddRange(_rightChild.GetLeafNodes());
+            }
+
+            return leaves;
         }
     }
 }
