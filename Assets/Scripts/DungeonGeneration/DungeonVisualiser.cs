@@ -25,15 +25,18 @@ namespace DungeonGeneration
         private GameObject[,] _dungeon;
 
         /// <summary>
-        /// Main entry point — generates a dungeon and visualises it in the Unity scene.
+        /// Main entry point — generates a dungeon and visualises it in the Unity Scene.
         /// </summary>
         private void Start()
         {
             // Create a dungeon generator object and generate a dungeon.
-            DungeonGenerator generator = new DungeonGenerator();
-            DungeonData data = generator.GenerateDungeon(dungeonWidth, dungeonHeight, minRoomSize, maxRoomSize);
+            DungeonGenerator generator = new DungeonGenerator(dungeonWidth, dungeonHeight, minRoomSize, maxRoomSize);
+            generator.GenerateDungeon();
             
             _dungeon = new GameObject[dungeonWidth, dungeonHeight];
+
+            // Get the dungeon's data.
+            DungeonData data = generator.GetData();
             
             // Create GameObjects for each room in the dungeon.
             foreach (var room in data.Rooms)

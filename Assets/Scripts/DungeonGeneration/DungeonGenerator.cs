@@ -26,39 +26,58 @@ namespace DungeonGeneration
     /// </summary>
     public class DungeonGenerator
     {
-        // 25% chance to split. Adds variety
+        // 25% chance to split node
         private const float SplitChanceThreshold = 0.75f;
-        
-        // TODO: instead of passing those configurables as params, create a constructor for DungeonGenerator
-        // TODO: instead of returning data in this method, save it as a field and write a getter
-        // TODO: Make DungeonGenerator a Singleton?
+
+        private readonly int _width;
+        private readonly int _height;
+        private readonly int _minRoomSize;
+        private readonly int _maxRoomSize;
+        private readonly DungeonData _data;
         
         /// <summary>
-        /// Generates a dungeon layout given the specified grid size and room size constraints.
+        /// Constructor.
         /// </summary>
-        /// <param name="rows">Number of rows in the dungeon (height).</param>
-        /// <param name="columns">Number of columns in the dungeon (width).</param>
+        /// <param name="width">The width (number of columns) of the dungeon.</param>
+        /// <<param name="height">The height (number of rows) of the dungeon.</param>
         /// <param name="minRoomSize">Minimum allowable room size.</param>
         /// <param name="maxRoomSize">Maximum allowable room size.</param>
-        public DungeonData GenerateDungeon(int rows, int columns, int minRoomSize, int maxRoomSize)
+        public DungeonGenerator(int width, int height, int minRoomSize, int maxRoomSize)
+        {
+            this._width = width;
+            this._height = height;
+            this._minRoomSize = minRoomSize;
+            this._maxRoomSize = maxRoomSize;
+            
+            this._data = new DungeonData();
+        }
+
+        /// <summary>
+        /// Getter method for the dungeon data.
+        /// </summary>
+        /// <returns>The data object containing the dungeon's layout information.</returns>
+        public DungeonData GetData()
+        {
+            return this._data;
+        }
+        
+        /// <summary>
+        /// Generates a dungeon using the BSP algorithm.
+        /// </summary>
+        public void GenerateDungeon()
         {
             // Create the main space (root node in the BSP tree) that takes up the whole size of the dungeon.
-            BSPNode root = new BSPNode(new Rect(0, 0, rows, columns));
+            BSPNode rootNode = new BSPNode(new Rect(0, 0, _width, _height));
             
             // Recursively partition the dungeon space.
-            Partition(root, minRoomSize, maxRoomSize);
+            Partition(rootNode);
             
             // Create rooms inside each node.
-            root.CreateRooms();
-            
-            // Create an object that holds the dungeon data. 
-            DungeonData data = new DungeonData();
+            rootNode.CreateRooms();
             
             // Save data about the rooms and corridors of the dungeon.
-            GetRooms(root, data.Rooms);
-            GetCorridors(root, data.Corridors);
-            
-            return data;
+            GetRooms(rootNode, _data.Rooms);
+            GetCorridors(rootNode, _data.Corridors);
         }
 
         /// <summary>
@@ -66,20 +85,18 @@ namespace DungeonGeneration
         /// subspaces (sub-dungeons) until a leaf node is reached. 
         /// </summary>
         /// <param name="node">The subspace (BSP node) that will be partitioned.</param>
-        /// <param name="minRoomSize">The minimum room size to partition the node into.</param>
-        /// <param name="maxRoomSize">The maximum room size to partition the node into.</param>
-        private void Partition(BSPNode node, int minRoomSize, int maxRoomSize)
+        private void Partition(BSPNode node)
         {
             // Check if node should be split (either too big or randomly decided)
-            if (node.NodeBounds.width > maxRoomSize      
-                || node.NodeBounds.height > maxRoomSize
+            if (node.NodeBounds.width > _maxRoomSize      
+                || node.NodeBounds.height > _maxRoomSize
                 || Random.Range(0.0f, 1.0f) > SplitChanceThreshold) 
             {
                 // If the sub-dungeon was successfully split, proceed to recursively partition its children
-                if (node.Split(minRoomSize))
+                if (node.Split(_minRoomSize))
                 {
-                    Partition(node.LeftChild, minRoomSize, maxRoomSize);
-                    Partition(node.RightChild, minRoomSize, maxRoomSize);
+                    Partition(node.LeftChild);
+                    Partition(node.RightChild);
                 }
             }
         }
