@@ -13,12 +13,12 @@ namespace DungeonGeneration.BinarySpacePartitioning
         // Getters
         public BSPNode LeftChild => _leftChild;
         public BSPNode RightChild => _rightChild;
-        public Rect Rect => _rect;
+        public Rect NodeBounds => _nodeBounds;
         public Rect Room => _room;
         public List<Rect> Corridors => _corridors;
         
         private BSPNode _leftChild, _rightChild;
-        private Rect _rect;
+        private Rect _nodeBounds;
         private Rect _room = new Rect(-1, -1, 0, 0); // I.e. null
         private List<Rect> _corridors = new();
 
@@ -33,10 +33,10 @@ namespace DungeonGeneration.BinarySpacePartitioning
         /// <summary>
         /// Constructor.
         /// </summary>
-        /// <param name="rect">The dimensions of the node.</param>
-        public BSPNode(Rect rect)
+        /// <param name="nodeBounds">The dimensions of the node.</param>
+        public BSPNode(Rect nodeBounds)
         {
-            this._rect = rect;
+            this._nodeBounds = nodeBounds;
         }
 
         /// <summary>
@@ -64,32 +64,32 @@ namespace DungeonGeneration.BinarySpacePartitioning
             // or if approximately square - choose vertical or horizontal at random
             bool splitHorizontally;
 
-            if (_rect.width / _rect.height >= AspectRatioThreshold)
+            if (_nodeBounds.width / _nodeBounds.height >= AspectRatioThreshold)
                 splitHorizontally = false;
-            else if (_rect.height / _rect.width >= AspectRatioThreshold)
+            else if (_nodeBounds.height / _nodeBounds.width >= AspectRatioThreshold)
                 splitHorizontally = true;
             else
                 splitHorizontally = Random.Range(0.0f, 1.0f) > SplitDirectionThreshold;
 
             // Too small - don't split
-            if (Mathf.Min(_rect.height, _rect.width) / 2 < minRoomSize) return false;
+            if (Mathf.Min(_nodeBounds.height, _nodeBounds.width) / 2 < minRoomSize) return false;
 
             if (splitHorizontally)
             {
                 // Split so that the resulting sub-dungeons widths are not too small
-                int split = Random.Range(minRoomSize, (int)(_rect.width - minRoomSize));
+                int split = Random.Range(minRoomSize, (int)(_nodeBounds.width - minRoomSize));
 
-                _leftChild = new BSPNode(new Rect(_rect.x, _rect.y, _rect.width, split));
+                _leftChild = new BSPNode(new Rect(_nodeBounds.x, _nodeBounds.y, _nodeBounds.width, split));
                 _rightChild = new BSPNode(
-                    new Rect(_rect.x, _rect.y + split, _rect.width, _rect.height - split));
+                    new Rect(_nodeBounds.x, _nodeBounds.y + split, _nodeBounds.width, _nodeBounds.height - split));
             }
             else // Split vertically
             {
-                int split = Random.Range(minRoomSize, (int)(_rect.height - minRoomSize));
+                int split = Random.Range(minRoomSize, (int)(_nodeBounds.height - minRoomSize));
 
-                _leftChild = new BSPNode(new Rect(_rect.x, _rect.y, split, _rect.height));
+                _leftChild = new BSPNode(new Rect(_nodeBounds.x, _nodeBounds.y, split, _nodeBounds.height));
                 _rightChild = new BSPNode(
-                    new Rect(_rect.x + split, _rect.y, _rect.width - split, _rect.height));
+                    new Rect(_nodeBounds.x + split, _nodeBounds.y, _nodeBounds.width - split, _nodeBounds.height));
             }
 
             return true;
@@ -112,13 +112,13 @@ namespace DungeonGeneration.BinarySpacePartitioning
             // Ready to hold a room - create one
             if (IsLeaf())
             {
-                int roomWidth = (int)Random.Range(_rect.width / 2, _rect.width - RoomSizeMargin);
-                int roomHeight = (int)Random.Range(_rect.height / 2, _rect.height - RoomSizeMargin);
-                int roomX = (int)Random.Range(1, _rect.width - roomWidth - RoomEdgePadding);
-                int roomY = (int)Random.Range(1, _rect.height - roomHeight - RoomEdgePadding);
+                int roomWidth = (int)Random.Range(_nodeBounds.width / 2, _nodeBounds.width - RoomSizeMargin);
+                int roomHeight = (int)Random.Range(_nodeBounds.height / 2, _nodeBounds.height - RoomSizeMargin);
+                int roomX = (int)Random.Range(1, _nodeBounds.width - roomWidth - RoomEdgePadding);
+                int roomY = (int)Random.Range(1, _nodeBounds.height - roomHeight - RoomEdgePadding);
 
                 // Room position will be absolute in the board, not relative to the sub-dungeon
-                _room = new Rect(_rect.x + roomX, _rect.y + roomY, roomWidth, roomHeight);
+                _room = new Rect(_nodeBounds.x + roomX, _nodeBounds.y + roomY, roomWidth, roomHeight);
             }
         }
         
@@ -184,9 +184,9 @@ namespace DungeonGeneration.BinarySpacePartitioning
         }
         
         /// <summary>
-        /// Recursively retrieves the first valid room (Rect) contained within this BSP node or its children.
+        /// Recursively retrieves the first valid room (NodeBounds) contained within this BSP node or its children.
         /// </summary>
-        /// <returns>The first valid room Rect found in this node or its children. Null room if no rooms exist.</returns>
+        /// <returns>The first valid room NodeBounds found in this node or its children. Null room if no rooms exist.</returns>
         public Rect GetRoom()
         {
             if (IsLeaf()) return _room;

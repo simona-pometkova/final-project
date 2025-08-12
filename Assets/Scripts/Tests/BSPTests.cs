@@ -59,8 +59,8 @@ public class BSPTests
         Rect room = node.GetRoom();
 
         Assert.IsTrue(room.width > 0 && room.height > 0, "Room is nonexistent.");
-        Assert.IsTrue(node.Rect.Contains(new Vector2(room.xMin, room.yMin)), "Room is out of node bounds.");
-        Assert.IsTrue(node.Rect.Contains(new Vector2(room.xMax, room.yMax)), "Room is out of node bounds.");
+        Assert.IsTrue(node.NodeBounds.Contains(new Vector2(room.xMin, room.yMin)), "Room is out of node bounds.");
+        Assert.IsTrue(node.NodeBounds.Contains(new Vector2(room.xMax, room.yMax)), "Room is out of node bounds.");
     }
 
     [Test]
