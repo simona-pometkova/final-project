@@ -40,7 +40,7 @@ namespace DungeonGeneration
             
             // Create GameObjects for each room in the dungeon.
             foreach (var room in data.Rooms)
-                DrawTile(room, roomTilePrefab);
+                DrawTile(room.Bounds, roomTilePrefab);
 
             // Crete GameObjects for each corridor in the dungeon.
             foreach (var corridor in data.Corridors)

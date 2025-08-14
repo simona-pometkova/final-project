@@ -10,16 +10,25 @@ namespace DungeonGeneration.BinarySpacePartitioning
     /// </summary>
     public class BSPNode
     {
+        public class Room
+        {
+            public Rect Bounds {  get; set; }
+
+            public Room(float x, float y, float width, float height)
+            {
+                this.Bounds = new Rect(x, y, width, height);
+            }
+        }
+
         // Getters
         public BSPNode LeftChild => _leftChild;
         public BSPNode RightChild => _rightChild;
         public Rect NodeBounds => _nodeBounds;
-        public Rect Room => _room;
         public List<Rect> Corridors => _corridors;
         
         private BSPNode _leftChild, _rightChild;
         private Rect _nodeBounds;
-        private Rect _room = new Rect(-1, -1, 0, 0); // I.e. null
+        private Room _room;
         private List<Rect> _corridors = new();
 
         // Configurable constants
@@ -88,8 +97,7 @@ namespace DungeonGeneration.BinarySpacePartitioning
                 int split = Random.Range(minRoomSize, (int)(_nodeBounds.height - minRoomSize));
 
                 _leftChild = new BSPNode(new Rect(_nodeBounds.x, _nodeBounds.y, split, _nodeBounds.height));
-                _rightChild = new BSPNode(
-                    new Rect(_nodeBounds.x + split, _nodeBounds.y, _nodeBounds.width - split, _nodeBounds.height));
+                _rightChild = new BSPNode(new Rect(_nodeBounds.x + split, _nodeBounds.y, _nodeBounds.width - split, _nodeBounds.height));
             }
 
             return true;
@@ -118,7 +126,9 @@ namespace DungeonGeneration.BinarySpacePartitioning
                 int roomY = (int)Random.Range(1, _nodeBounds.height - roomHeight - RoomEdgePadding);
 
                 // Room position will be absolute in the board, not relative to the sub-dungeon
-                _room = new Rect(_nodeBounds.x + roomX, _nodeBounds.y + roomY, roomWidth, roomHeight);
+                // Only create a room if its dimension are big enough
+                if (roomWidth > 0 && roomHeight > 0)
+                    _room = new Room(_nodeBounds.x + roomX, _nodeBounds.y + roomY, roomWidth, roomHeight);
             }
         }
         
@@ -132,14 +142,14 @@ namespace DungeonGeneration.BinarySpacePartitioning
         /// <param name="right">The BSP node representing the second room.</param>
         private void CreateCorridorBetween(BSPNode left, BSPNode right)
         {
-            Rect leftRoom = left.GetRoom();
-            Rect rightRoom = right.GetRoom();
+            Room leftRoom = left.GetRoom();
+            Room rightRoom = right.GetRoom();
 
             // Attach the corridor to a random point in each room
-            Vector2 leftPoint = new Vector2((int)Random.Range(leftRoom.x + CorridorBoundaryPadding, leftRoom.xMax - CorridorBoundaryPadding),
-                (int)Random.Range(leftRoom.y + CorridorBoundaryPadding, leftRoom.yMax - CorridorBoundaryPadding));
-            Vector2 rightPoint = new Vector2((int)Random.Range(rightRoom.x + CorridorBoundaryPadding, rightRoom.xMax - CorridorBoundaryPadding),
-                (int)Random.Range(rightRoom.y + CorridorBoundaryPadding, rightRoom.yMax - CorridorBoundaryPadding));
+            Vector2 leftPoint = new Vector2((int)Random.Range(leftRoom.Bounds.x + CorridorBoundaryPadding, leftRoom.Bounds.xMax - CorridorBoundaryPadding),
+                (int)Random.Range(leftRoom.Bounds.yMax + CorridorBoundaryPadding, leftRoom.Bounds.yMax - CorridorBoundaryPadding));
+            Vector2 rightPoint = new Vector2((int)Random.Range(rightRoom.Bounds.x + CorridorBoundaryPadding, rightRoom.Bounds.xMax - CorridorBoundaryPadding),
+                (int)Random.Range(rightRoom.Bounds.y + CorridorBoundaryPadding, rightRoom.Bounds.yMax - CorridorBoundaryPadding));
 
             // Ensure leftPoint is to the left of rightPoint to simplify horizontal corridor logic
             if (leftPoint.x > rightPoint.x)
@@ -184,27 +194,27 @@ namespace DungeonGeneration.BinarySpacePartitioning
         }
         
         /// <summary>
-        /// Recursively retrieves the first valid room (NodeBounds) contained within this BSP node or its children.
+        /// Recursively retrieves the first valid room contained within this BSP node or its children.
         /// </summary>
-        /// <returns>The first valid room NodeBounds found in this node or its children. Null room if no rooms exist.</returns>
-        public Rect GetRoom()
+        /// <returns>The first valid room found in this node or its children. Null room if no room exists.</returns>
+        public Room GetRoom()
         {
             if (IsLeaf()) return _room;
 
             if (_leftChild != null)
             {
-                Rect leftRoom = _leftChild.GetRoom();
-                if (!Mathf.Approximately(leftRoom.x, -1)) return leftRoom;
+                Room leftRoom = _leftChild.GetRoom();
+                if (leftRoom != null) return leftRoom;
             }
 
             if (_rightChild != null)
             {
-                Rect rightRoom = _rightChild.GetRoom();
-                if (!Mathf.Approximately(rightRoom.x, -1)) return rightRoom;
+                Room rightRoom = _rightChild.GetRoom();
+                if (rightRoom != null) return rightRoom;
             }
 
-            // No room is found - workaround non-nullable struct
-            return new Rect(-1, -1, 0, 0);
+            // No room is found
+            return null;
         }
 
         /// <summary>

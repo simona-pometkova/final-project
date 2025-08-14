@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using DungeonGeneration.BinarySpacePartitioning;
 using UnityEngine;
+using static DungeonGeneration.BinarySpacePartitioning.BSPNode;
 
 namespace DungeonGeneration
 {
@@ -12,7 +13,7 @@ namespace DungeonGeneration
     /// </summary>
     public class DungeonData
     {
-        public readonly List<Rect> Rooms = new();
+        public readonly List<Room> Rooms = new();
         public readonly List<Rect> Corridors = new();
     }
     
@@ -78,6 +79,11 @@ namespace DungeonGeneration
             // Save data about the rooms and corridors of the dungeon.
             GetRooms(rootNode, _data.Rooms);
             GetCorridors(rootNode, _data.Corridors);
+
+            Debug.Log($"Rooms count: ${_data.Rooms.Count}");
+            Debug.Log(_data.Rooms);
+            Debug.Log($"Corridors count: ${_data.Corridors.Count}");
+            Debug.Log(_data.Corridors);
         }
 
         /// <summary>
@@ -106,14 +112,16 @@ namespace DungeonGeneration
         /// </summary>
         /// <param name="node">The current node to process.</param>
         /// <param name="rooms">The list to which all discovered rooms will be added.</param>
-        private void GetRooms(BSPNode node, List<Rect> rooms)
+        private void GetRooms(BSPNode node, List<Room> rooms)
         {
             if (node == null) return;
 
             if (node.IsLeaf())
             {
-                Rect room = node.GetRoom();
-                rooms.Add(room);
+                Room room = node.GetRoom();
+
+                if (room != null)
+                    rooms.Add(room);
             }
             else
             {

@@ -2,6 +2,7 @@ using DungeonGeneration;
 using DungeonGeneration.BinarySpacePartitioning;
 using NUnit.Framework;
 using UnityEngine;
+using static DungeonGeneration.BinarySpacePartitioning.BSPNode;
 
 public class BSPTests
 {
@@ -57,11 +58,11 @@ public class BSPTests
     {
         BSPNode node = new BSPNode(new Rect(0, 0, 32, 32));
         node.CreateRooms();
-        Rect room = node.GetRoom();
+        Room room = node.GetRoom();
 
-        Assert.IsTrue(room.width > 0 && room.height > 0, "Room is nonexistent.");
-        Assert.IsTrue(node.NodeBounds.Contains(new Vector2(room.xMin, room.yMin)), "Room is out of node bounds.");
-        Assert.IsTrue(node.NodeBounds.Contains(new Vector2(room.xMax, room.yMax)), "Room is out of node bounds.");
+        Assert.IsTrue(room.Bounds.width > 0 && room.Bounds.height > 0, "Room is nonexistent.");
+        Assert.IsTrue(node.NodeBounds.Contains(new Vector2(room.Bounds.xMin, room.Bounds.yMin)), "Room is out of node bounds.");
+        Assert.IsTrue(node.NodeBounds.Contains(new Vector2(room.Bounds.xMax, room.Bounds.yMax)), "Room is out of node bounds.");
     }
 
     /// <summary>
@@ -82,8 +83,8 @@ public class BSPTests
 
         foreach (var leaf in leaves)
         {
-            Rect room = leaf.GetRoom();
-            Assert.IsTrue(room.width > 0, "Leaf node has no room.");
+            Room room = leaf.GetRoom();
+            Assert.IsTrue(room.Bounds.width > 0, "Leaf node has no room.");
         }
     }
 
