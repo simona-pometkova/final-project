@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using DungeonGeneration;
 using DungeonGeneration.BinarySpacePartitioning;
 using NUnit.Framework;
@@ -114,5 +115,42 @@ public class BSPTests
         DungeonData data = generator.GetData();
         
         Assert.IsEmpty(data.Corridors, "No corridors should be generated when dungeon is too small.");
+    }
+
+    /// <summary>
+    /// Tests whether rooms count matches leaf nodes count.
+    /// Each leaf node should contain a room.
+    /// </summary>
+    [Test]
+    public void DungeonGenerator_RoomsCountMatchesLeavesCount()
+    {
+        BSPNode root = new BSPNode(new Rect(0, 0, 32, 32));
+        root.CreateRooms();
+        List<BSPNode> leaves = root.GetLeafNodes();
+        int roomsCount = 0;
+
+        foreach (var leaf in leaves)
+        {
+            var room = leaf.GetRoom();
+            if (room != null) roomsCount++;
+        }
+            
+        Assert.AreEqual(leaves.Count, roomsCount, "Some leaves do not have a room.");
+    }
+
+    /// <summary>
+    /// Tests whether any corridors inside the dungeon are duplicated.
+    /// </summary>
+    [Test]
+    public void Corridors_NoDuplicates()
+    {
+        DungeonGenerator generator = new DungeonGenerator(50, 50, 10, 15);
+        generator.GenerateDungeon();
+        DungeonData data = generator.GetData();
+        
+        HashSet<Rect> seen = new HashSet<Rect>();
+
+        foreach (var corridor in data.Corridors)
+            Assert.IsTrue(seen.Add(corridor), "Duplicate corridor was found.");
     }
 }
