@@ -28,6 +28,7 @@ namespace DungeonGeneration
     public class DungeonGenerator
     {
         // 25% chance to split node
+        // TODO export as Serializable field?
         private const float SplitChanceThreshold = 0.75f;
 
         private readonly int _width;

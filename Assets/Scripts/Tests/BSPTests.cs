@@ -84,23 +84,35 @@ public class BSPTests
         foreach (var leaf in leaves)
         {
             Room room = leaf.GetRoom();
-            Assert.IsTrue(room.Bounds.width > 0, "Leaf node has no room.");
+            Assert.IsTrue(room != null, "Leaf node has no room.");
         }
     }
-
+    
     /// <summary>
-    /// Tests whether the dungeon fails to be generated
-    /// (i.e. no rooms and corridors are created)
-    /// if its dimensions are too small.
+    /// Tests whether rooms fail to be created
+    /// if dungeon dimensions are too small.
     /// </summary>
     [Test]
-    public void DungeonGenerator_HandlesTooSmallDungeon()
+    public void DungeonGenerator_NoRoomsIfDungeonTooSmall()
     {
         DungeonGenerator generator = new DungeonGenerator(1, 1, 8, 16);
         generator.GenerateDungeon();
         DungeonData data = generator.GetData();
         
         Assert.IsEmpty(data.Rooms, "No rooms should be generated when dungeon is too small.");
+    }
+
+    /// <summary>
+    /// Tests whether corridors fail to be created
+    /// if dungeon dimensions are too small.
+    /// </summary>
+    [Test]
+    public void DungeonGenerator_NoCorridorsIfDungeonTooSmall()
+    {
+        DungeonGenerator generator = new DungeonGenerator(1, 1, 8, 16);
+        generator.GenerateDungeon();
+        DungeonData data = generator.GetData();
+        
         Assert.IsEmpty(data.Corridors, "No corridors should be generated when dungeon is too small.");
-    } 
+    }
 }

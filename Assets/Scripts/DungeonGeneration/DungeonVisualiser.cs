@@ -40,11 +40,11 @@ namespace DungeonGeneration
             
             // Create GameObjects for each room in the dungeon.
             foreach (var room in data.Rooms)
-                DrawTile(room.Bounds, roomTilePrefab);
+                DrawTiles(room.Bounds, roomTilePrefab);
 
             // Crete GameObjects for each corridor in the dungeon.
             foreach (var corridor in data.Corridors)
-                DrawTile(corridor, corridorTilePrefab);
+                DrawTiles(corridor, corridorTilePrefab);
         }
 
         /// <summary>
@@ -53,7 +53,7 @@ namespace DungeonGeneration
         /// </summary>
         /// <param name="rect">The rectangular area to fill with tiles.</param>
         /// <param name="prefab">The prefab to instantiate for each empty grid coordinate.</param>
-        private void DrawTile(Rect rect, GameObject prefab)
+        private void DrawTiles(Rect rect, GameObject prefab)
         {
             // Traverse the area.
             for (int i = (int)rect.xMin; i < rect.xMax; i++)
