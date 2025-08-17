@@ -15,6 +15,24 @@ namespace DungeonGeneration
     {
         public readonly List<Room> Rooms = new();
         public readonly List<Rect> Corridors = new();
+        public BSPNode RootNode { get; private set; }
+        public int Width { get; }
+        public int Height { get; }
+        public int MinNodeSize { get; }
+        public int MaxNodeSize { get; }
+        
+        public DungeonData(int width, int height, int minNodeSize, int maxNodeSize)
+        {
+            this.Width = width;
+            this.Height = height;
+            this.MinNodeSize = minNodeSize;
+            this.MaxNodeSize = maxNodeSize;
+        }        
+        
+        public void SetRoot(BSPNode root)
+        {
+            this.RootNode = root;
+        }
     }
     
     /// <summary>
@@ -27,49 +45,34 @@ namespace DungeonGeneration
     /// </summary>
     public class DungeonGenerator
     {
+        public DungeonData Dungeon => _dungeon;
+        
         // 25% chance to split node
         // TODO export as Serializable field?
         private const float SplitChanceThreshold = 0.75f;
-
-        private readonly int _width;
-        private readonly int _height;
-        private readonly int _minRoomSize;
-        private readonly int _maxRoomSize;
-        private readonly DungeonData _data;
+        
+        private readonly DungeonData _dungeon;
         
         /// <summary>
         /// Constructor.
         /// </summary>
         /// <param name="width">The width (number of columns) of the dungeon.</param>
-        /// <<param name="height">The height (number of rows) of the dungeon.</param>
-        /// <param name="minRoomSize">Minimum allowable room size.</param>
-        /// <param name="maxRoomSize">Maximum allowable room size.</param>
-        public DungeonGenerator(int width, int height, int minRoomSize, int maxRoomSize)
+        /// <param name="height">The height (number of rows) of the dungeon.</param>
+        /// <param name="minNodeSize">Minimum allowable node size.</param>
+        /// <param name="maxNodeSize">Maximum allowable node size.</param>
+        public DungeonGenerator(int width, int height, int minNodeSize, int maxNodeSize)
         {
-            this._width = width;
-            this._height = height;
-            this._minRoomSize = minRoomSize;
-            this._maxRoomSize = maxRoomSize;
-            
-            this._data = new DungeonData();
+            this._dungeon = new DungeonData(width, height, minNodeSize, maxNodeSize);
         }
 
-        /// <summary>
-        /// Getter method for the dungeon data.
-        /// </summary>
-        /// <returns>The data object containing the dungeon's layout information.</returns>
-        public DungeonData GetData()
-        {
-            return this._data;
-        }
-        
         /// <summary>
         /// Generates a dungeon using the BSP algorithm.
         /// </summary>
         public void GenerateDungeon()
         {
             // Create the main space (root node in the BSP tree) that takes up the whole size of the dungeon.
-            BSPNode rootNode = new BSPNode(new Rect(0, 0, _width, _height));
+            BSPNode rootNode = new BSPNode(new Rect(0, 0, _dungeon.Width, _dungeon.Height));
+            this._dungeon.SetRoot(rootNode);
             
             // Recursively partition the dungeon space.
             Partition(rootNode);
@@ -78,29 +81,26 @@ namespace DungeonGeneration
             rootNode.CreateRooms();
             
             // Save data about the rooms and corridors of the dungeon.
-            GetRooms(rootNode, _data.Rooms);
-            GetCorridors(rootNode, _data.Corridors);
-
-            Debug.Log($"Rooms count: ${_data.Rooms.Count}");
-            Debug.Log(_data.Rooms);
-            Debug.Log($"Corridors count: ${_data.Corridors.Count}");
-            Debug.Log(_data.Corridors);
+            GetRooms(rootNode, _dungeon.Rooms);
+            GetCorridors(rootNode, _dungeon.Corridors);
+            
+            Debug.Log($"Rooms count: {_dungeon.Rooms.Count}");
         }
 
         /// <summary>
-        /// Starting from the root node, recursively partitions the space into
-        /// subspaces (sub-dungeons) until a leaf node is reached. 
+        /// Starting from the root node, recursively subdivides the tree
+        /// into subspaces (sub-dungeons) until a leaf node is reached. 
         /// </summary>
         /// <param name="node">The subspace (BSP node) that will be partitioned.</param>
         private void Partition(BSPNode node)
         {
             // Check if node should be split (either too big or randomly decided)
-            if (node.NodeBounds.width > _maxRoomSize      
-                || node.NodeBounds.height > _maxRoomSize
+            if (node.NodeBounds.width > _dungeon.MaxNodeSize      
+                || node.NodeBounds.height > _dungeon.MaxNodeSize
                 || Random.Range(0.0f, 1.0f) > SplitChanceThreshold) 
             {
                 // If the sub-dungeon was successfully split, proceed to recursively partition its children
-                if (node.Split(_minRoomSize))
+                if (node.Split(_dungeon.MinNodeSize))
                 {
                     Partition(node.LeftChild);
                     Partition(node.RightChild);

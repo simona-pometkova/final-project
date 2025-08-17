@@ -5,152 +5,191 @@ using NUnit.Framework;
 using UnityEngine;
 using static DungeonGeneration.BinarySpacePartitioning.BSPNode;
 
-public class BSPTests
+namespace Tests
 {
-    /// <summary>
-    /// Tests whether a node is successfully split.
-    /// </summary>
-    [Test]
-    public void Node_SplitsSuccessfully()
+    public class BSPTests
     {
-        BSPNode root = new BSPNode(new Rect(0, 0, 64, 64));
-        bool didSplit = root.Split(16);
-
-        Assert.IsTrue(didSplit, "Node split was unsuccessful.");
-    }
-
-    /// <summary>
-    /// Tests whether a node is split into two children nodes,
-    /// i.e. it is not a leaf node.
-    /// </summary>
-    [Test]
-    public void Node_CreatesTwoChildren()
-    {
-        BSPNode root = new BSPNode(new Rect(0, 0, 64, 64));
-        root.Split(16);
-
-        Assert.IsNotNull(root.LeftChild, "Left child is null.");
-        Assert.IsNotNull(root.RightChild, "Right child is null.");
-        Assert.IsFalse(root.IsLeaf(), "Node is a leaf and does not contain children.");
-    }
-
-    /// <summary>
-    /// Tests whether a node is not split if it's too small, 
-    /// i.e. it remains a leaf in the BSP tree and no children are created.
-    /// </summary>
-    [Test]
-    public void Node_SplitFailsWhenTooSmall()
-    {
-        BSPNode root = new BSPNode(new Rect(0, 0, 10, 10));
-        bool didSplit = root.Split(16);
-
-        Assert.IsFalse(didSplit, "Node was split.");
-        Assert.IsTrue(root.IsLeaf(), "Node is not a leaf.");
-        Assert.IsNull(root.LeftChild, "Node has a left child.");
-        Assert.IsNull(root.RightChild, "Node has a right child.");
-    }
-
-    /// <summary>
-    /// Tests whether a room fits inside the bounds of a node,
-    /// i.e. a room is not bigger than the node it is located in.
-    /// </summary>
-    [Test]
-    public void Room_IsWithinNodeBounds()
-    {
-        BSPNode node = new BSPNode(new Rect(0, 0, 32, 32));
-        node.CreateRooms();
-        Room room = node.GetRoom();
-
-        Assert.IsTrue(room.Bounds.width > 0 && room.Bounds.height > 0, "Room is nonexistent.");
-        Assert.IsTrue(node.NodeBounds.Contains(new Vector2(room.Bounds.xMin, room.Bounds.yMin)), "Room is out of node bounds.");
-        Assert.IsTrue(node.NodeBounds.Contains(new Vector2(room.Bounds.xMax, room.Bounds.yMax)), "Room is out of node bounds.");
-    }
-
-    /// <summary>
-    /// Tests whether the algorithm creates a room 
-    /// inside each leaf node of the BSP tree.
-    /// </summary>
-    [Test]
-    public void Room_CreatesRoomInAllLeaves()
-    {
-        BSPNode root = new BSPNode(new Rect(0, 0, 64, 64));
-        root.Split(16);
-        root.LeftChild.Split(16);
-        root.RightChild.Split(16);
-
-        root.CreateRooms();
-
-        var leaves = root.GetLeafNodes();
-
-        foreach (var leaf in leaves)
+        /// <summary>
+        /// Tests whether a node is successfully split.
+        /// </summary>
+        [Test]
+        public void Node_IsSplit()
         {
-            Room room = leaf.GetRoom();
-            Assert.IsTrue(room != null, "Leaf node has no room.");
+            BSPNode root = new BSPNode(new Rect(0, 0, 64, 64));
+            bool wasSplit = root.Split(16);
+
+            Assert.IsTrue(wasSplit, "Node was not split.");
         }
-    }
-    
-    /// <summary>
-    /// Tests whether rooms fail to be created
-    /// if dungeon dimensions are too small.
-    /// </summary>
-    [Test]
-    public void DungeonGenerator_NoRoomsIfDungeonTooSmall()
-    {
-        DungeonGenerator generator = new DungeonGenerator(1, 1, 8, 16);
-        generator.GenerateDungeon();
-        DungeonData data = generator.GetData();
         
-        Assert.IsEmpty(data.Rooms, "No rooms should be generated when dungeon is too small.");
-    }
-
-    /// <summary>
-    /// Tests whether corridors fail to be created
-    /// if dungeon dimensions are too small.
-    /// </summary>
-    [Test]
-    public void DungeonGenerator_NoCorridorsIfDungeonTooSmall()
-    {
-        DungeonGenerator generator = new DungeonGenerator(1, 1, 8, 16);
-        generator.GenerateDungeon();
-        DungeonData data = generator.GetData();
-        
-        Assert.IsEmpty(data.Corridors, "No corridors should be generated when dungeon is too small.");
-    }
-
-    /// <summary>
-    /// Tests whether rooms count matches leaf nodes count.
-    /// Each leaf node should contain a room.
-    /// </summary>
-    [Test]
-    public void DungeonGenerator_RoomsCountMatchesLeavesCount()
-    {
-        BSPNode root = new BSPNode(new Rect(0, 0, 32, 32));
-        root.CreateRooms();
-        List<BSPNode> leaves = root.GetLeafNodes();
-        int roomsCount = 0;
-
-        foreach (var leaf in leaves)
+        /// <summary>
+        /// Tests whether a node has children
+        /// (i.e. it is not a leaf) when it is split.
+        /// </summary>
+        [Test]
+        public void Node_HasChildren()
         {
-            var room = leaf.GetRoom();
-            if (room != null) roomsCount++;
+            BSPNode root = new BSPNode(new Rect(0, 0, 64, 64));
+            root.Split(16);
+
+            Assert.IsFalse(root.IsLeaf(), "Node does not have children.");
         }
+
+        /// <summary>
+        /// Tests whether a node is not split if it's too small, 
+        /// i.e. it remains a leaf in the BSP tree and no children are created.
+        /// </summary>
+        [Test]
+        public void Split_FailsWhenNodeTooSmall()
+        {
+            BSPNode root = new BSPNode(new Rect(0, 0, 10, 10));
+            bool didSplit = root.Split(16);
+
+            Assert.IsFalse(didSplit, "Node was split.");
+        }
+
+        /// <summary>
+        /// Tests whether a left child is created
+        /// when splitting a node.
+        /// </summary>
+        [Test]
+        public void Split_CreatesLeftChild()
+        {
+            BSPNode root = new BSPNode(new Rect(0, 0, 64, 64));
+            root.Split(16);
             
-        Assert.AreEqual(leaves.Count, roomsCount, "Some leaves do not have a room.");
-    }
+            Assert.IsNotNull(root.LeftChild, "Left child does not exist.");
+        }
 
-    /// <summary>
-    /// Tests whether any corridors inside the dungeon are duplicated.
-    /// </summary>
-    [Test]
-    public void Corridors_NoDuplicates()
-    {
-        DungeonGenerator generator = new DungeonGenerator(50, 50, 10, 15);
-        generator.GenerateDungeon();
-        DungeonData data = generator.GetData();
+        /// <summary>
+        /// Tests whether a right child is created
+        /// when splitting a node.
+        /// </summary>
+        [Test]
+        public void Split_CreatesRightChild()
+        {
+            BSPNode root = new BSPNode(new Rect(0, 0, 64, 64));
+            root.Split(16);
+            
+            Assert.IsNotNull(root.RightChild, "Right child does not exist.");
+        }
+
+        /// <summary>
+        /// Tests whether rooms fail to be created
+        /// if dungeon dimensions are too small.
+        /// </summary>
+        [Test]
+        public void Dungeon_NoRoomsIfDungeonTooSmall()
+        {
+            DungeonGenerator generator = new DungeonGenerator(1, 1, 8, 16);
+            generator.GenerateDungeon();
+            
+            Assert.IsEmpty(generator.Dungeon.Rooms, "No rooms should be generated when dungeon is too small.");
+        }
+
+        /// <summary>
+        /// Tests whether corridors fail to be created
+        /// if dungeon dimensions are too small.
+        /// </summary>
+        [Test]
+        public void Dungeon_NoCorridorsIfDungeonTooSmall()
+        {
+            DungeonGenerator generator = new DungeonGenerator(1, 1, 8, 16);
+            generator.GenerateDungeon();
+            
+            Assert.IsEmpty(generator.Dungeon.Corridors, "No corridors should be generated when dungeon is too small.");
+        }
+
+        /// <summary>
+        /// Tests whether rooms count matches leaf nodes count.
+        /// Each leaf node should contain a room.
+        /// </summary>
+        [Test]
+        public void Dungeon_RoomsCountMatchesLeavesCount()
+        {
+            BSPNode root = new BSPNode(new Rect(0, 0, 32, 32));
+            root.CreateRooms();
+            List<BSPNode> leaves = root.GetLeafNodes();
+            int roomsCount = 0;
+
+            foreach (var leaf in leaves)
+            {
+                var room = leaf.GetRoom();
+                if (room != null) roomsCount++;
+                
+                Assert.IsTrue(room != null, "Leaf node has no room.");
+            }
+                
+            Assert.AreEqual(leaves.Count, roomsCount, "Some leaves do not have a room.");
+        }
+    
+        /// <summary>
+        /// Tests whether a dungeon is created
+        /// if large parameters are passed.
+        /// </summary>
+        [Test]
+        public void Dungeon_CreateLargeDungeon()
+        {
+            DungeonGenerator generator = new DungeonGenerator(350, 350, 5, 100);
+            generator.GenerateDungeon();
+            
+            DungeonData dungeon = generator.Dungeon;
+            
+            Assert.IsNotNull(dungeon.Rooms, "Large dungeon should have rooms.");
+            Assert.IsNotNull(dungeon.Corridors, "Large dungeon should have corridors.");
+
+            void AssertConstraints(BSPNode node)
+            {
+                Rect bounds = node.NodeBounds;
+
+                if (node.IsLeaf())
+                {
+                    Assert.GreaterOrEqual(bounds.width, dungeon.MinNodeSize);
+                    Assert.LessOrEqual(bounds.width, dungeon.MaxNodeSize);
+
+                    Assert.GreaterOrEqual(bounds.height, dungeon.MinNodeSize);
+                    Assert.LessOrEqual(bounds.height, dungeon.MaxNodeSize);
+                }
+                else
+                {
+                    if (node.LeftChild != null) AssertConstraints(node.LeftChild);
+                    if (node.RightChild != null) AssertConstraints(node.RightChild);
+                }
+            }
+            
+            AssertConstraints(dungeon.RootNode);
+        }
+
+        /// <summary>
+        /// Tests whether any corridors inside the dungeon are duplicated.
+        /// </summary>
+        [Test]
+        public void Corridors_NoDuplicates()
+        {
+            DungeonGenerator generator = new DungeonGenerator(50, 50, 10, 15);
+            generator.GenerateDungeon();
+            
+            HashSet<string> seen = new HashSet<string>();
+
+            foreach (var corridor in generator.Dungeon.Corridors)
+            {
+                string id = $"{corridor.x}, {corridor.y}, {corridor.width}, {corridor.height}";
+                Assert.IsTrue(seen.Add(id), $"Duplicate corridor was found: {id}");
+            }
+        }
         
-        HashSet<Rect> seen = new HashSet<Rect>();
+        /// <summary>
+        /// Tests whether a room fits inside the bounds of a node,
+        /// i.e. a room is not bigger than the node it is located in.
+        /// </summary>
+        [Test]
+        public void Room_IsWithinNodeBounds()
+        {
+            BSPNode node = new BSPNode(new Rect(0, 0, 32, 32));
+            node.CreateRooms();
+            Room room = node.GetRoom();
 
-        foreach (var corridor in data.Corridors)
-            Assert.IsTrue(seen.Add(corridor), "Duplicate corridor was found.");
+            Assert.IsTrue(node.NodeBounds.Overlaps(room.Bounds), "Room does not fit inside node bounds.");
+        }
     }
 }
+
