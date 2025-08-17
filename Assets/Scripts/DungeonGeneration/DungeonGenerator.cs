@@ -83,8 +83,6 @@ namespace DungeonGeneration
             // Save data about the rooms and corridors of the dungeon.
             GetRooms(rootNode, _dungeon.Rooms);
             GetCorridors(rootNode, _dungeon.Corridors);
-            
-            Debug.Log($"Rooms count: {_dungeon.Rooms.Count}");
         }
 
         /// <summary>

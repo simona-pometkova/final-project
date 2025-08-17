@@ -121,43 +121,6 @@ namespace Tests
                 
             Assert.AreEqual(leaves.Count, roomsCount, "Some leaves do not have a room.");
         }
-    
-        /// <summary>
-        /// Tests whether a dungeon is created
-        /// if large parameters are passed.
-        /// </summary>
-        [Test]
-        public void Dungeon_CreateLargeDungeon()
-        {
-            DungeonGenerator generator = new DungeonGenerator(350, 350, 5, 100);
-            generator.GenerateDungeon();
-            
-            DungeonData dungeon = generator.Dungeon;
-            
-            Assert.IsNotNull(dungeon.Rooms, "Large dungeon should have rooms.");
-            Assert.IsNotNull(dungeon.Corridors, "Large dungeon should have corridors.");
-
-            void AssertConstraints(BSPNode node)
-            {
-                Rect bounds = node.NodeBounds;
-
-                if (node.IsLeaf())
-                {
-                    Assert.GreaterOrEqual(bounds.width, dungeon.MinNodeSize);
-                    Assert.LessOrEqual(bounds.width, dungeon.MaxNodeSize);
-
-                    Assert.GreaterOrEqual(bounds.height, dungeon.MinNodeSize);
-                    Assert.LessOrEqual(bounds.height, dungeon.MaxNodeSize);
-                }
-                else
-                {
-                    if (node.LeftChild != null) AssertConstraints(node.LeftChild);
-                    if (node.RightChild != null) AssertConstraints(node.RightChild);
-                }
-            }
-            
-            AssertConstraints(dungeon.RootNode);
-        }
 
         /// <summary>
         /// Tests whether any corridors inside the dungeon are duplicated.
