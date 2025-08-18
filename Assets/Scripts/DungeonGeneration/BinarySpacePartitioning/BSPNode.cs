@@ -130,15 +130,8 @@ namespace DungeonGeneration.BinarySpacePartitioning
             _rightChild?.CreateRooms();
 
             // If both children exist, create a connection (corridor)
-            // between the rooms inside them 
             if (_leftChild != null && _rightChild != null)
-            {
-                Room leftRoom = _leftChild.GetRoom();
-                Room rightRoom = _rightChild.GetRoom();
-                
-                if (leftRoom != null && rightRoom != null)
-                    CreateCorridorBetween(leftRoom, rightRoom);
-            }
+                CreateCorridorBetween(_leftChild, _rightChild);
 
             // Ready to hold a room - create one
             if (IsLeaf())
@@ -149,25 +142,27 @@ namespace DungeonGeneration.BinarySpacePartitioning
                 int roomY = (int)Random.Range(RoomEdgePadding, _nodeBounds.height - roomHeight - RoomEdgePadding);
 
                 // Room position will be absolute in the board, not relative to the sub-dungeon
-                // Only create a room if its dimension are big enough
-                if (roomWidth > 0 && roomHeight > 0)
-                    _room = new Room(_nodeBounds.x + roomX, _nodeBounds.y + roomY, roomWidth, roomHeight);
+                _room = new Room(_nodeBounds.x + roomX, _nodeBounds.y + roomY, roomWidth, roomHeight);
             }
         }
         
         /// <summary>
-        /// Creates an L-shaped corridor between two rooms.
+        /// Creates an L-shaped corridor between two nodes.
         /// A random point is selected inside each room (with padding from the walls),
-        /// and a corridor is drawn between them. If the rooms are aligned vertically,
+        /// and a corridor is drawn between them. If the nodes are aligned vertically,
         /// a straight vertical corridor is created.
         /// </summary>
-        /// <param name="leftRoom">The left room to connect.</param>
-        /// <param name="rightRoom">The right room to connect.</param>
-        private void CreateCorridorBetween(Room leftRoom, Room rightRoom)
+        /// <param name="left">The BSP node to get the left room from.</param>
+        /// <param name="right">The BSP node to get the right room from.</param>
+        private void CreateCorridorBetween(BSPNode left, BSPNode right)
         {
+            Room leftRoom = left.GetRoom();
+            Room rightRoom = right.GetRoom();
+            
             // Attach the corridor to a random point in each room
             Vector2 leftPoint = new Vector2((int)Random.Range(leftRoom.Bounds.x + CorridorBoundaryPadding, leftRoom.Bounds.xMax - CorridorBoundaryPadding),
                 (int)Random.Range(leftRoom.Bounds.y + CorridorBoundaryPadding, leftRoom.Bounds.yMax - CorridorBoundaryPadding));
+            
             Vector2 rightPoint = new Vector2((int)Random.Range(rightRoom.Bounds.x + CorridorBoundaryPadding, rightRoom.Bounds.xMax - CorridorBoundaryPadding),
                 (int)Random.Range(rightRoom.Bounds.y + CorridorBoundaryPadding, rightRoom.Bounds.yMax - CorridorBoundaryPadding));
 
