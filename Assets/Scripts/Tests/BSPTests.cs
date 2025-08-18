@@ -135,7 +135,7 @@ namespace Tests
 
             foreach (var corridor in generator.Dungeon.Corridors)
             {
-                string id = $"{corridor.x}, {corridor.y}, {corridor.width}, {corridor.height}";
+                string id = $"{corridor.Start}, {corridor.End}";
                 Assert.IsTrue(seen.Add(id), $"Duplicate corridor was found: {id}");
             }
         }

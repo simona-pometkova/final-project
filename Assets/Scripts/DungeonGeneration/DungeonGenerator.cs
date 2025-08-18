@@ -14,7 +14,7 @@ namespace DungeonGeneration
     public class DungeonData
     {
         public readonly List<Room> Rooms = new();
-        public readonly List<Rect> Corridors = new();
+        public List<Corridor> Corridors = new();
         public BSPNode RootNode { get; private set; }
         public int Width { get; }
         public int Height { get; }
@@ -32,6 +32,11 @@ namespace DungeonGeneration
         public void SetRoot(BSPNode root)
         {
             this.RootNode = root;
+        }
+
+        public void SetCorridors(List<Corridor> corridors)
+        {
+            this.Corridors = corridors;
         }
     }
     
@@ -134,7 +139,7 @@ namespace DungeonGeneration
         /// </summary>
         /// <param name="node">The current node to process.</param>
         /// <param name="corridors">The list to which all discovered corridors will be added.</param>
-        private void GetCorridors(BSPNode node, List<Rect> corridors)
+        private void GetCorridors(BSPNode node, List<Corridor> corridors)
         {
             if (node == null) return;
             

@@ -43,7 +43,8 @@ namespace DungeonGeneration
 
             // Create GameObjects for each corridor in the dungeon.
             foreach (var corridor in generator.Dungeon.Corridors)
-                DrawTiles(corridor, corridorTilePrefab, "Corridor", corridorsParent);
+                foreach (var segment in corridor.Segments)
+                    DrawTiles(segment, corridorTilePrefab, "Corridor", corridorsParent);
         }
 
         /// <summary>

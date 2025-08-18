@@ -39,21 +39,21 @@ namespace DungeonGeneration.BinarySpacePartitioning
         public BSPNode LeftChild => _leftChild;
         public BSPNode RightChild => _rightChild;
         public Rect NodeBounds => _nodeBounds;
-        public List<Rect> Corridors => _corridors;
+        public List<Corridor> Corridors => _corridors;
         
         private BSPNode _leftChild, _rightChild;
         private Rect _nodeBounds;
         private Room _room;
-        private List<Rect> _corridors = new();
+        private List<Corridor> _corridors = new();
 
         // Configurable constants
         // TODO export as Serializable fields
         private const int RoomEdgePadding = 1;
         private const int RoomSizeMargin = 2;
-        private const int CorridorBoundaryPadding = 5;
 
         private const float AspectRatioThreshold = 1.25f;
         private const float SplitDirectionThreshold = 0.5f;
+        private const int CorridorPadding = 5;
 
         /// <summary>
         /// Constructor.
@@ -129,9 +129,15 @@ namespace DungeonGeneration.BinarySpacePartitioning
             _leftChild?.CreateRooms();
             _rightChild?.CreateRooms();
 
-            // If both children exist, create a connection (corridor)
+            // If both children exist, connect them with a corridor
             if (_leftChild != null && _rightChild != null)
-                CreateCorridorBetween(_leftChild, _rightChild);
+            {
+                Room leftRoom = _leftChild.GetRoom();
+                Room rightRoom = _rightChild.GetRoom();
+
+                if (leftRoom != null && rightRoom != null)
+                    CreateCorridor(leftRoom, rightRoom);
+            }
 
             // Ready to hold a room - create one
             if (IsLeaf())
@@ -142,69 +148,34 @@ namespace DungeonGeneration.BinarySpacePartitioning
                 int roomY = (int)Random.Range(RoomEdgePadding, _nodeBounds.height - roomHeight - RoomEdgePadding);
 
                 // Room position will be absolute in the board, not relative to the sub-dungeon
-                _room = new Room(_nodeBounds.x + roomX, _nodeBounds.y + roomY, roomWidth, roomHeight);
+                // Only create a room if dimensions are big enough
+                if (roomWidth != 0 && roomHeight != 0)
+                    _room = new Room(_nodeBounds.x + roomX, _nodeBounds.y + roomY, roomWidth, roomHeight);
             }
         }
-        
-        /// <summary>
-        /// Creates an L-shaped corridor between two nodes.
-        /// A random point is selected inside each room (with padding from the walls),
-        /// and a corridor is drawn between them. If the nodes are aligned vertically,
-        /// a straight vertical corridor is created.
-        /// </summary>
-        /// <param name="left">The BSP node to get the left room from.</param>
-        /// <param name="right">The BSP node to get the right room from.</param>
-        private void CreateCorridorBetween(BSPNode left, BSPNode right)
+
+        private void CreateCorridor(Room leftRoom, Room rightRoom)
         {
-            Room leftRoom = left.GetRoom();
-            Room rightRoom = right.GetRoom();
-            
-            // Attach the corridor to a random point in each room
-            Vector2 leftPoint = new Vector2((int)Random.Range(leftRoom.Bounds.x + CorridorBoundaryPadding, leftRoom.Bounds.xMax - CorridorBoundaryPadding),
-                (int)Random.Range(leftRoom.Bounds.y + CorridorBoundaryPadding, leftRoom.Bounds.yMax - CorridorBoundaryPadding));
-            
-            Vector2 rightPoint = new Vector2((int)Random.Range(rightRoom.Bounds.x + CorridorBoundaryPadding, rightRoom.Bounds.xMax - CorridorBoundaryPadding),
-                (int)Random.Range(rightRoom.Bounds.y + CorridorBoundaryPadding, rightRoom.Bounds.yMax - CorridorBoundaryPadding));
+            Vector2Int leftPoint = new(
+                (int)Random.Range(leftRoom.Bounds.xMin + CorridorPadding, leftRoom.Bounds.xMax - CorridorPadding),
+                (int)Random.Range(leftRoom.Bounds.yMin + CorridorPadding, leftRoom.Bounds.yMax - CorridorPadding)
+            );
 
-            // Ensure leftPoint is to the left of rightPoint to simplify horizontal corridor logic
-            if (leftPoint.x > rightPoint.x)
-                //Swap via deconstruction.
-                (leftPoint, rightPoint) = (rightPoint, leftPoint);
+            Vector2Int rightPoint = new(
+                (int)Random.Range(rightRoom.Bounds.xMin + CorridorPadding, rightRoom.Bounds.xMax - CorridorPadding),
+                (int)Random.Range(rightRoom.Bounds.yMin + CorridorPadding, rightRoom.Bounds.yMax - CorridorPadding)
+            );
 
-            int width = (int)(leftPoint.x - rightPoint.x);
-            int height = (int)(leftPoint.y - rightPoint.y);
-
-            // If the points are not aligned horizontally
-            if (width != 0)
+            // Randomly decide whether to go horizontal first, then vertical, or vice versa
+            if (Random.value > 0.5f)
             {
-                // Choose at random (50% chance) to go horizontal then vertical or the opposite
-                if (Random.value > 0.5f)
-                {
-                    // Add a corridor to the right
-                    _corridors.Add(new Rect(leftPoint.x, leftPoint.y, Mathf.Abs(width) + 1, 1));
-
-                    // If left point is below right point, go up; otherwise go down
-                    _corridors.Add(height < 0
-                        ? new Rect(rightPoint.x, leftPoint.y, 1, Mathf.Abs(height)) 
-                        : new Rect(rightPoint.x, leftPoint.y, 1, -Mathf.Abs(height)));
-                }
-                else
-                {
-                    // Go up or down
-                    _corridors.Add(height < 0
-                        ? new Rect(leftPoint.x, leftPoint.y, 1, Mathf.Abs(height))
-                        : new Rect(leftPoint.x, rightPoint.y, 1, Mathf.Abs(height)));
-
-                    // Go right
-                    _corridors.Add(new Rect(leftPoint.x, rightPoint.y, Mathf.Abs(width) + 1, 1));
-                }
+                _corridors.Add(new Corridor(leftPoint, new Vector2Int(rightPoint.x, leftPoint.y)));
+                _corridors.Add(new Corridor(new Vector2Int(rightPoint.x, leftPoint.y), rightPoint));
             }
             else
             {
-                // If the points are aligned horizontally, go up or down depending on the positions
-                _corridors.Add(height < 0
-                    ? new Rect((int)leftPoint.x, (int)leftPoint.y, 1, Mathf.Abs(height))
-                    : new Rect((int)rightPoint.x, (int)rightPoint.y, 1, Mathf.Abs(height)));
+                _corridors.Add(new Corridor(leftPoint, new Vector2Int(leftPoint.x, rightPoint.y)));
+                _corridors.Add(new Corridor(new Vector2Int(leftPoint.x, rightPoint.y), rightPoint));
             }
         }
         
