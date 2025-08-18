@@ -14,7 +14,7 @@ namespace DungeonGeneration
     public class DungeonData
     {
         public readonly List<Room> Rooms = new();
-        public List<Corridor> Corridors = new();
+        public readonly List<Corridor> Corridors = new();
         public BSPNode RootNode { get; private set; }
         public int Width { get; }
         public int Height { get; }
@@ -32,11 +32,6 @@ namespace DungeonGeneration
         public void SetRoot(BSPNode root)
         {
             this.RootNode = root;
-        }
-
-        public void SetCorridors(List<Corridor> corridors)
-        {
-            this.Corridors = corridors;
         }
     }
     
