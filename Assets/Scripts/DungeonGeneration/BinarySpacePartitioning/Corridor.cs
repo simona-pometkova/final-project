@@ -12,37 +12,48 @@ namespace DungeonGeneration.BinarySpacePartitioning
     public class Corridor
     {
         public List<Rect> Segments => _segments;
-        public Vector2Int Start { get; }
-        public Vector2Int End { get; }
+        public Room RightRoom { get; private set; }
+        public Room LeftRoom { get; private set;}
 
         private List<Rect> _segments = new();
 
         private const int CorridorThickness = 1;
+        private const int CorridorPadding = 5;
 
-        public Corridor(Vector2Int start, Vector2Int end)
+        public Corridor(Room leftRoom, Room rightRoom)
         {
-            Start = start;
-            End = end;
+            this.LeftRoom = leftRoom;
+            this.RightRoom = rightRoom;
 
-            GenerateSegments();
+            Vector2Int leftPoint = new(
+                (int)UnityEngine.Random.Range(leftRoom.Bounds.xMin + CorridorPadding, leftRoom.Bounds.xMax - CorridorPadding),
+                (int)UnityEngine.Random.Range(leftRoom.Bounds.yMin + CorridorPadding, leftRoom.Bounds.yMax - CorridorPadding)
+            );
+
+            Vector2Int rightPoint = new(
+                (int)UnityEngine.Random.Range(rightRoom.Bounds.xMin + CorridorPadding, rightRoom.Bounds.xMax - CorridorPadding),
+                (int)UnityEngine.Random.Range(rightRoom.Bounds.yMin + CorridorPadding, rightRoom.Bounds.yMax - CorridorPadding)
+            );
+
+            GenerateSegments(leftPoint, rightPoint);
         }
 
-        private void GenerateSegments()
+        private void GenerateSegments(Vector2Int leftPoint, Vector2Int rightPoint)
         {
             // Horizontal segment
-            if (Start.x != End.x)
+            if (leftPoint.x != rightPoint.x)
             {
-                int left = Mathf.Min(Start.x, End.x);
-                int width = Mathf.Abs(End.x - Start.x) + CorridorThickness;
-                _segments.Add(new Rect(left, Start.y, width, CorridorThickness));
+                int left = Mathf.Min(leftPoint.x, rightPoint.x);
+                int width = Mathf.Abs(rightPoint.x - leftPoint.x) + CorridorThickness;
+                _segments.Add(new Rect(left, leftPoint.y, width, CorridorThickness));
             }
 
             // Vertical segment
-            if (Start.y != End.y)
+            if (leftPoint.y != rightPoint.y)
             {
-                int bottom = Mathf.Min(Start.y, End.y);
-                int height = Mathf.Abs(End.y - Start.y) + CorridorThickness;
-                _segments.Add(new Rect(End.x, bottom, CorridorThickness, height));
+                int bottom = Mathf.Min(leftPoint.y, rightPoint.y);
+                int height = Mathf.Abs(rightPoint.y - leftPoint.y) + CorridorThickness;
+                _segments.Add(new Rect(rightPoint.x, bottom, CorridorThickness, height));
             }
         }
     }

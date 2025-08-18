@@ -136,7 +136,10 @@ namespace DungeonGeneration.BinarySpacePartitioning
                 Room rightRoom = _rightChild.GetRoom();
 
                 if (leftRoom != null && rightRoom != null)
-                    CreateCorridor(leftRoom, rightRoom);
+                {
+                    Corridor corridor = new Corridor(leftRoom, rightRoom);
+                    _corridors.Add(corridor);
+                }
             }
 
             // Ready to hold a room - create one
@@ -151,31 +154,6 @@ namespace DungeonGeneration.BinarySpacePartitioning
                 // Only create a room if dimensions are big enough
                 if (roomWidth != 0 && roomHeight != 0)
                     _room = new Room(_nodeBounds.x + roomX, _nodeBounds.y + roomY, roomWidth, roomHeight);
-            }
-        }
-
-        private void CreateCorridor(Room leftRoom, Room rightRoom)
-        {
-            Vector2Int leftPoint = new(
-                (int)Random.Range(leftRoom.Bounds.xMin + CorridorPadding, leftRoom.Bounds.xMax - CorridorPadding),
-                (int)Random.Range(leftRoom.Bounds.yMin + CorridorPadding, leftRoom.Bounds.yMax - CorridorPadding)
-            );
-
-            Vector2Int rightPoint = new(
-                (int)Random.Range(rightRoom.Bounds.xMin + CorridorPadding, rightRoom.Bounds.xMax - CorridorPadding),
-                (int)Random.Range(rightRoom.Bounds.yMin + CorridorPadding, rightRoom.Bounds.yMax - CorridorPadding)
-            );
-
-            // Randomly decide whether to go horizontal first, then vertical, or vice versa
-            if (Random.value > 0.5f)
-            {
-                _corridors.Add(new Corridor(leftPoint, new Vector2Int(rightPoint.x, leftPoint.y)));
-                _corridors.Add(new Corridor(new Vector2Int(rightPoint.x, leftPoint.y), rightPoint));
-            }
-            else
-            {
-                _corridors.Add(new Corridor(leftPoint, new Vector2Int(leftPoint.x, rightPoint.y)));
-                _corridors.Add(new Corridor(new Vector2Int(leftPoint.x, rightPoint.y), rightPoint));
             }
         }
         
