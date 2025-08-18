@@ -50,7 +50,7 @@ namespace DungeonGeneration.BinarySpacePartitioning
         // TODO export as Serializable fields
         private const int RoomEdgePadding = 1;
         private const int RoomSizeMargin = 2;
-        private const int CorridorBoundaryPadding = 1;
+        private const int CorridorBoundaryPadding = 5;
 
         private const float AspectRatioThreshold = 1.25f;
         private const float SplitDirectionThreshold = 0.5f;
@@ -129,17 +129,24 @@ namespace DungeonGeneration.BinarySpacePartitioning
             _leftChild?.CreateRooms();
             _rightChild?.CreateRooms();
 
-            // If both children exist, create a connection (corridor) between them
+            // If both children exist, create a connection (corridor)
+            // between the rooms inside them 
             if (_leftChild != null && _rightChild != null)
-                CreateCorridorBetween(_leftChild, _rightChild);
+            {
+                Room leftRoom = _leftChild.GetRoom();
+                Room rightRoom = _rightChild.GetRoom();
+                
+                if (leftRoom != null && rightRoom != null)
+                    CreateCorridorBetween(leftRoom, rightRoom);
+            }
 
             // Ready to hold a room - create one
             if (IsLeaf())
             {
                 int roomWidth = (int)Random.Range(_nodeBounds.width / 2, _nodeBounds.width - RoomSizeMargin);
                 int roomHeight = (int)Random.Range(_nodeBounds.height / 2, _nodeBounds.height - RoomSizeMargin);
-                int roomX = (int)Random.Range(1, _nodeBounds.width - roomWidth - RoomEdgePadding);
-                int roomY = (int)Random.Range(1, _nodeBounds.height - roomHeight - RoomEdgePadding);
+                int roomX = (int)Random.Range(RoomEdgePadding, _nodeBounds.width - roomWidth - RoomEdgePadding);
+                int roomY = (int)Random.Range(RoomEdgePadding, _nodeBounds.height - roomHeight - RoomEdgePadding);
 
                 // Room position will be absolute in the board, not relative to the sub-dungeon
                 // Only create a room if its dimension are big enough
@@ -149,21 +156,18 @@ namespace DungeonGeneration.BinarySpacePartitioning
         }
         
         /// <summary>
-        /// Creates an L-shaped corridor between two rooms represented by the given BSP nodes.
+        /// Creates an L-shaped corridor between two rooms.
         /// A random point is selected inside each room (with padding from the walls),
-        /// and a corridor is drawn between them. If the rooms are aligned vertically, a straight
-        /// vertical corridor is created.
+        /// and a corridor is drawn between them. If the rooms are aligned vertically,
+        /// a straight vertical corridor is created.
         /// </summary>
-        /// <param name="left">The BSP node representing the first room.</param>
-        /// <param name="right">The BSP node representing the second room.</param>
-        private void CreateCorridorBetween(BSPNode left, BSPNode right)
+        /// <param name="leftRoom">The left room to connect.</param>
+        /// <param name="rightRoom">The right room to connect.</param>
+        private void CreateCorridorBetween(Room leftRoom, Room rightRoom)
         {
-            Room leftRoom = left.GetRoom();
-            Room rightRoom = right.GetRoom();
-
             // Attach the corridor to a random point in each room
             Vector2 leftPoint = new Vector2((int)Random.Range(leftRoom.Bounds.x + CorridorBoundaryPadding, leftRoom.Bounds.xMax - CorridorBoundaryPadding),
-                (int)Random.Range(leftRoom.Bounds.yMax + CorridorBoundaryPadding, leftRoom.Bounds.yMax - CorridorBoundaryPadding));
+                (int)Random.Range(leftRoom.Bounds.y + CorridorBoundaryPadding, leftRoom.Bounds.yMax - CorridorBoundaryPadding));
             Vector2 rightPoint = new Vector2((int)Random.Range(rightRoom.Bounds.x + CorridorBoundaryPadding, rightRoom.Bounds.xMax - CorridorBoundaryPadding),
                 (int)Random.Range(rightRoom.Bounds.y + CorridorBoundaryPadding, rightRoom.Bounds.yMax - CorridorBoundaryPadding));
 
@@ -178,8 +182,8 @@ namespace DungeonGeneration.BinarySpacePartitioning
             // If the points are not aligned horizontally
             if (width != 0)
             {
-                // Choose at random to go horizontal then vertical or the opposite
-                if (Random.Range(0, 1) > 2)
+                // Choose at random (50% chance) to go horizontal then vertical or the opposite
+                if (Random.value > 0.5f)
                 {
                     // Add a corridor to the right
                     _corridors.Add(new Rect(leftPoint.x, leftPoint.y, Mathf.Abs(width) + 1, 1));
