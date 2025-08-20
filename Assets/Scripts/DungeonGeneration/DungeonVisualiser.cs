@@ -1,3 +1,4 @@
+using DungeonGeneration.BinarySpacePartitioning;
 using UnityEngine;
 
 namespace DungeonGeneration
@@ -17,8 +18,9 @@ namespace DungeonGeneration
         [SerializeField] private int maxNodeSize = 20;
     
         [Header("Prefabs")]
-        [SerializeField] private GameObject roomTilePrefab;
-        [SerializeField] private GameObject corridorTilePrefab;
+        [SerializeField] private GameObject roomFloorTilePrefab;
+        [SerializeField] private GameObject roomWallTilePrefab;
+        [SerializeField] private GameObject corridorFloorTilePrefab;
 
         [Header("Transforms")] 
         [SerializeField] private Transform roomsParent;
@@ -39,12 +41,12 @@ namespace DungeonGeneration
 
             // Create GameObjects for each room in the dungeon.
             foreach (var room in generator.Dungeon.Rooms)
-                DrawTiles(room.Bounds, roomTilePrefab, "Room", roomsParent);
+                Draw(room, roomFloorTilePrefab, roomWallTilePrefab, "Room", roomsParent);
 
             // Create GameObjects for each corridor in the dungeon.
             foreach (var corridor in generator.Dungeon.Corridors)
                 foreach (var segment in corridor.Segments)
-                    DrawTiles(segment, corridorTilePrefab, "Corridor", corridorsParent);
+                    DrawTiles(segment, corridorFloorTilePrefab, "Corridor", corridorsParent);
         }
 
         /// <summary>
@@ -74,6 +76,35 @@ namespace DungeonGeneration
                     // Instantiate tile GameObject and assign it to dungeon coordinate.
                     GameObject tile = Instantiate(tilePrefab, new Vector3(i, j, 0), Quaternion.identity, holder.transform);
                     _dungeonGameObject[i, j] = tile;
+                }
+            }
+
+            if (holder.transform.childCount > 0)
+                holder.transform.SetParent(parent);
+            else Destroy(holder);
+        }
+
+        private void Draw(Room room, GameObject floorPrefab, GameObject wallPrefab, string gameObjectName, Transform parent)
+        {
+            int[,] grid = room.NoiseGrid;
+            int width = grid.GetLength(0);
+            int height = grid.GetLength(1);
+
+            GameObject holder = new GameObject(gameObjectName);
+
+            for (int x = 0; x < width; x++)
+            {
+                for (int y = 0; y < height; y++)
+                {
+                    int value = grid[x, y];
+                    if (value == 1)
+                    {
+                        // Position relative to room
+                        Vector3 position = new Vector3(room.Bounds.x + x, room.Bounds.y + y, 0);
+                        GameObject tile = Instantiate(floorPrefab, position, Quaternion.identity, holder.transform);
+
+                        _dungeonGameObject[(int)(room.Bounds.x + x), (int)(room.Bounds.y + y)] = tile;
+                    }
                 }
             }
 

@@ -10,31 +10,6 @@ namespace DungeonGeneration.BinarySpacePartitioning
     /// </summary>
     public class BSPNode
     {
-        /// <summary>
-        /// Workaround non-nullable structs. Defining the room
-        /// as its own class allows me to not have a room inside a node
-        /// if I don't need to (e.g. node is too small to be partitioned).
-        /// </summary>
-        public class Room
-        {
-            // Used to define the position and shape 
-            // of the room - instead of the room directly
-            // being a Rect. 
-            public Rect Bounds {  get; }
-
-            /// <summary>
-            /// Constructor.
-            /// </summary>
-            /// <param name="x">Start position of the room on the x-axis.</param>
-            /// <param name="y">Start position of the room on the y-axis.</param>
-            /// <param name="width">Width of the room (number of tiles).</param>
-            /// <param name="height">Height of the room (number of tiles).</param>
-            public Room(float x, float y, float width, float height)
-            {
-                this.Bounds = new Rect(x, y, width, height);
-            }
-        }
-
         // Getters
         public BSPNode LeftChild => _leftChild;
         public BSPNode RightChild => _rightChild;
@@ -130,17 +105,20 @@ namespace DungeonGeneration.BinarySpacePartitioning
             _rightChild?.CreateRooms();
 
             // If both children exist, connect them with a corridor
-            if (_leftChild != null && _rightChild != null)
-            {
-                Room leftRoom = _leftChild.GetRoom();
-                Room rightRoom = _rightChild.GetRoom();
+            // TODO removed corridors for now. Will connect rooms after
+            // CA terrain smoothing is implemented.
 
-                if (leftRoom != null && rightRoom != null)
-                {
-                    Corridor corridor = new Corridor(leftRoom, rightRoom);
-                    _corridors.Add(corridor);
-                }
-            }
+            //if (_leftChild != null && _rightChild != null)
+            //{
+            //    Room leftRoom = _leftChild.GetRoom();
+            //    Room rightRoom = _rightChild.GetRoom();
+
+            //    if (leftRoom != null && rightRoom != null)
+            //    {
+            //        Corridor corridor = new Corridor(leftRoom, rightRoom);
+            //        _corridors.Add(corridor);
+            //    }
+            //}
 
             // Ready to hold a room - create one
             if (IsLeaf())
