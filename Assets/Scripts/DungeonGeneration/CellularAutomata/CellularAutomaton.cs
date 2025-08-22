@@ -34,10 +34,11 @@
         /// </summary>
         /// <param name="width">Number of columns in the grid.</param>
         /// <param name="height">Number of rows in the grid.</param>
+        /// <param name="density">Probability factor. Defaults to <see cref="Density"/>.</param>
         /// <returns>
         /// A 2D array where 1 represents a floor cell and 0 represents a wall cell.
         /// </returns>
-        public static int[,] GenerateNoiseGrid(int width, int height)
+        public static int[,] GenerateNoiseGrid(int width, int height, int density = Density)
         {
             // Initialize an empty grid of the given size
             int[,] noiseGrid = new int[width, height];
@@ -51,7 +52,7 @@
                 for (int y = 0; y < height; y++)
                 {
                     // Floor (1) if roll is below Density threshold, otherwise wall (0)
-                    noiseGrid[x, y] = random.Next(0, 100) < Density ? 1 : 0; 
+                    noiseGrid[x, y] = random.Next(0, 100) < density ? 1 : 0; 
                 }
             }
 
