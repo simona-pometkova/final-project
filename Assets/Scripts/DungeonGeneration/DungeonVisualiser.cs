@@ -86,7 +86,7 @@ namespace DungeonGeneration
 
         private void Draw(Room room, GameObject floorPrefab, GameObject wallPrefab, string gameObjectName, Transform parent)
         {
-            int[,] grid = room.NoiseGrid;
+            int[,] grid = room.Grid;
             int width = grid.GetLength(0);
             int height = grid.GetLength(1);
 

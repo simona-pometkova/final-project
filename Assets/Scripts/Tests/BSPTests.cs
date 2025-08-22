@@ -100,6 +100,19 @@ namespace Tests
         }
 
         /// <summary>
+        /// Tests whether a dungeon is successfully generated
+        /// (i.e. rooms are created) when its dimensions are large.
+        /// </summary>
+        [Test]
+        public void Dungeon_GenerateRoomsInLargeDungeon()
+        {
+            DungeonGenerator generator = new DungeonGenerator(500, 500, 15, 30);
+            generator.GenerateDungeon();
+            
+            Assert.IsNotEmpty(generator.Dungeon.Rooms, "Rooms should be generated for large dungeons.");
+        }
+
+        /// <summary>
         /// Tests whether rooms count matches leaf nodes count.
         /// Each leaf node should contain a room.
         /// </summary>

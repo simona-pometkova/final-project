@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using UnityEngine;
-using static DungeonGeneration.BinarySpacePartitioning.BSPNode;
 
 namespace DungeonGeneration.BinarySpacePartitioning
 {
@@ -26,13 +20,13 @@ namespace DungeonGeneration.BinarySpacePartitioning
             this.RightRoom = rightRoom;
 
             Vector2Int leftPoint = new(
-                (int)UnityEngine.Random.Range(leftRoom.Bounds.xMin + CorridorPadding, leftRoom.Bounds.xMax - CorridorPadding),
-                (int)UnityEngine.Random.Range(leftRoom.Bounds.yMin + CorridorPadding, leftRoom.Bounds.yMax - CorridorPadding)
+                (int)Random.Range(leftRoom.Bounds.xMin + CorridorPadding, leftRoom.Bounds.xMax - CorridorPadding),
+                (int)Random.Range(leftRoom.Bounds.yMin + CorridorPadding, leftRoom.Bounds.yMax - CorridorPadding)
             );
 
             Vector2Int rightPoint = new(
-                (int)UnityEngine.Random.Range(rightRoom.Bounds.xMin + CorridorPadding, rightRoom.Bounds.xMax - CorridorPadding),
-                (int)UnityEngine.Random.Range(rightRoom.Bounds.yMin + CorridorPadding, rightRoom.Bounds.yMax - CorridorPadding)
+                (int)Random.Range(rightRoom.Bounds.xMin + CorridorPadding, rightRoom.Bounds.xMax - CorridorPadding),
+                (int)Random.Range(rightRoom.Bounds.yMin + CorridorPadding, rightRoom.Bounds.yMax - CorridorPadding)
             );
 
             GenerateSegments(leftPoint, rightPoint);
