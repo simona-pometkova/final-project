@@ -28,7 +28,6 @@ namespace DungeonGeneration.BinarySpacePartitioning
 
         private const float AspectRatioThreshold = 1.25f;
         private const float SplitDirectionThreshold = 0.5f;
-        private const int CorridorPadding = 5;
 
         /// <summary>
         /// Constructor.
@@ -166,11 +165,11 @@ namespace DungeonGeneration.BinarySpacePartitioning
         {
             List<BSPNode> leaves = new();
 
-            // If this node is a leaf, add it to the list.
+            // If this node is a leaf, add it to the list
             if (IsLeaf()) leaves.Add(this);
             else
             {
-                // This node is not a leaf - traverse its children and get the leaf nodes inside of them.
+                // This node is not a leaf - traverse its children and get the leaf nodes inside of them
                 if (_leftChild != null) leaves.AddRange(_leftChild.GetLeafNodes());
                 if (_rightChild != null) leaves.AddRange(_rightChild.GetLeafNodes());
             }

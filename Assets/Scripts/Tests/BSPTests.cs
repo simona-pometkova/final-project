@@ -3,10 +3,13 @@ using DungeonGeneration;
 using DungeonGeneration.BinarySpacePartitioning;
 using NUnit.Framework;
 using UnityEngine;
-using static DungeonGeneration.BinarySpacePartitioning.BSPNode;
 
 namespace Tests
 {
+    /// <summary>
+    /// A collection of unit tests focused on the
+    /// Binary Space Partitioning algorithm.
+    /// </summary>
     public class BSPTests
     {
         /// <summary>

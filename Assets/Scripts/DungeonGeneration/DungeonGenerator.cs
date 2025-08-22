@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using DungeonGeneration.BinarySpacePartitioning;
 using UnityEngine;
-using static DungeonGeneration.BinarySpacePartitioning.BSPNode;
 
 namespace DungeonGeneration
 {
@@ -70,17 +69,17 @@ namespace DungeonGeneration
         /// </summary>
         public void GenerateDungeon()
         {
-            // Create the main space (root node in the BSP tree) that takes up the whole size of the dungeon.
+            // Create the main space (root node in the BSP tree) that takes up the whole size of the dungeon
             BSPNode rootNode = new BSPNode(new Rect(0, 0, _dungeon.Width, _dungeon.Height));
             this._dungeon.SetRoot(rootNode);
             
-            // Recursively partition the dungeon space.
+            // Recursively partition the dungeon space
             Partition(rootNode);
             
-            // Create rooms inside each node.
+            // Create rooms inside each node
             rootNode.CreateRooms();
             
-            // Save data about the rooms and corridors of the dungeon.
+            // Save data about the rooms and corridors of the dungeon
             GetRooms(rootNode, _dungeon.Rooms);
             GetCorridors(rootNode, _dungeon.Corridors);
         }

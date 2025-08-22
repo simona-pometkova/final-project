@@ -30,6 +30,9 @@ namespace DungeonGeneration.BinarySpacePartitioning
         {
             this.Bounds = new Rect(x, y, width, height);
 
+            // Apply local CA smoothing to the room:
+            // // 1. Generate a noise grid
+            // // 2. Smooth out using CA rules
             this._grid = CellularAutomaton.GenerateNoiseGrid(width, height);
             this._grid = CellularAutomaton.ApplyRules(this._grid);
         }
