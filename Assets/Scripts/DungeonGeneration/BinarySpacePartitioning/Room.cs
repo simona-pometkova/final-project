@@ -1,4 +1,5 @@
-﻿using DungeonGeneration.CellularAutomata;
+﻿using System.Collections.Generic;
+using DungeonGeneration.CellularAutomata;
 using UnityEngine;
 using Utils;
 
@@ -37,18 +38,9 @@ namespace DungeonGeneration.BinarySpacePartitioning
             this._grid = CellularAutomaton.GenerateNoiseGrid(width, height);
             this._grid = CellularAutomaton.ApplyRules(this._grid);
 
-            var islands = FloodFill.FindRoomIslands(this._grid);
-            Debug.Log($"Room has {islands.Count} islands.");
-
-            islands.Sort((a, b) => b.Count - a.Count);
-
-            for (int i = 1; i < islands.Count; i++)
-            {
-                foreach (var point in islands[i])
-                {
-                    _grid[point.x, point.y] = 0; // turn into wall
-                }
-            }
+            // Post-process CA smoothing to connect isolated islands of floor
+            var islands = Connectivity.FindRoomIslands(this._grid);
+            Connectivity.ConnectRoomIslands(this._grid, islands);
         }
     }
 }

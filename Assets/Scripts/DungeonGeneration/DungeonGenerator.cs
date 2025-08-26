@@ -76,8 +76,9 @@ namespace DungeonGeneration
             // Recursively partition the dungeon space
             Partition(rootNode);
             
-            // Create rooms inside each node
+            // Create rooms and corridors
             rootNode.CreateRooms();
+            rootNode.CreateCorridors();
             
             // Save data about the rooms and corridors of the dungeon
             GetRooms(rootNode, _dungeon.Rooms);

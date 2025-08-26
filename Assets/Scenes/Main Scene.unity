@@ -418,8 +418,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 92cef5e7be62c4ec4a13effae506a6fc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dungeonWidth: 80
-  dungeonHeight: 80
+  dungeonWidth: 100
+  dungeonHeight: 100
   minNodeSize: 15
   maxNodeSize: 30
   roomFloorTilePrefab: {fileID: 741796142995102789, guid: 89d830a780cf64bf298b0d4368e9a7fd, type: 3}

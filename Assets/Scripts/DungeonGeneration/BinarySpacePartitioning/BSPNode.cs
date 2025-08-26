@@ -104,8 +104,6 @@ namespace DungeonGeneration.BinarySpacePartitioning
             _rightChild?.CreateRooms();
 
             // If both children exist, connect them with a corridor
-            // TODO removed corridors for now. Will connect rooms after CA is implemented.
-
             // if (_leftChild != null && _rightChild != null)
             // {
             //     Room leftRoom = _leftChild.GetRoom();
@@ -131,6 +129,11 @@ namespace DungeonGeneration.BinarySpacePartitioning
                 if (roomWidth != 0 && roomHeight != 0)
                     _room = new Room(_nodeBounds.x + roomX, _nodeBounds.y + roomY, roomWidth, roomHeight);
             }
+        }
+
+        public void CreateCorridors()
+        {
+            
         }
         
         /// <summary>
