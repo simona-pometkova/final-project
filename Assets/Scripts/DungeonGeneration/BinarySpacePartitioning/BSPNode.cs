@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using Utils;
 
 namespace DungeonGeneration.BinarySpacePartitioning
 {
@@ -14,12 +15,10 @@ namespace DungeonGeneration.BinarySpacePartitioning
         public BSPNode LeftChild => _leftChild;
         public BSPNode RightChild => _rightChild;
         public Rect NodeBounds => _nodeBounds;
-        public List<Corridor> Corridors => _corridors;
         
         private BSPNode _leftChild, _rightChild;
         private Rect _nodeBounds;
         private Room _room;
-        private List<Corridor> _corridors = new();
 
         // Configurable constants
         // TODO export as Serializable fields
@@ -131,8 +130,7 @@ namespace DungeonGeneration.BinarySpacePartitioning
             
                 if (leftRoom != null && rightRoom != null)
                 {
-                    Corridor corridor = new Corridor(leftRoom, rightRoom, dungeonGrid);
-                    _corridors.Add(corridor);
+                    Connectivity.ConnectRooms(dungeonGrid, leftRoom.FloorTiles, rightRoom.FloorTiles);
                 }
             }
         }

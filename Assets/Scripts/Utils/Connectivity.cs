@@ -106,5 +106,47 @@ namespace Utils
 
             return floorTiles;
         }
+
+        //TODO document
+        public static void ConnectRooms(int[,] dungeonGrid, List<Vector2Int> leftRoomTiles,
+            List<Vector2Int> rightRoomTiles)
+        {
+            // 1. Find closest tiles between the two rooms
+            (Vector2Int start, Vector2Int end) = FindClosestTiles(leftRoomTiles, rightRoomTiles);
+
+            // 2. Pick an L-shaped corner (horizontal then vertical OR vertical then horizontal)
+            Vector2Int corner;
+            if (Random.value < 0.5f)
+                corner = new Vector2Int(end.x, start.y); // horizontal first
+            else
+                corner = new Vector2Int(start.x, end.y); // vertical first
+
+            BresenhamLine.Draw(dungeonGrid, start, corner);
+            BresenhamLine.Draw(dungeonGrid, corner, end);
+        }
+        
+        //TODO document
+        private static (Vector2Int a, Vector2Int b) FindClosestTiles(List<Vector2Int> leftRoomTiles, List<Vector2Int> rightRoomTiles)
+        {
+            Vector2Int closestA = Vector2Int.zero;
+            Vector2Int closestB = Vector2Int.zero;
+            int bestDist = int.MaxValue;
+            
+            foreach (var tileA in leftRoomTiles)
+            {
+                foreach (var tileB in rightRoomTiles)
+                {
+                    int dist = Maths.ManhattanDistance(tileA, tileB);
+                    if (dist < bestDist)
+                    {
+                        bestDist = dist;
+                        closestA = tileA;
+                        closestB = tileB;
+                    }
+                }
+            }
+
+            return (closestA, closestB);
+        }
     }
 }

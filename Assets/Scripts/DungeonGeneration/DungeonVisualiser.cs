@@ -1,5 +1,6 @@
 using DungeonGeneration.BinarySpacePartitioning;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace DungeonGeneration
 {
@@ -18,13 +19,13 @@ namespace DungeonGeneration
         [SerializeField] private int maxNodeSize = 20;
     
         [Header("Prefabs")]
-        [SerializeField] private GameObject roomFloorTilePrefab;
-        [SerializeField] private GameObject roomWallTilePrefab;
-        [SerializeField] private GameObject corridorFloorTilePrefab;
+        [SerializeField] private GameObject floorTilePrefab;
+        [SerializeField] private GameObject wallTilePrefab;
 
         [Header("Transforms")] 
         [SerializeField] private Transform roomsParent;
         [SerializeField] private Transform corridorsParent;
+        [SerializeField] private Transform wallsParent;
 
         private GameObject[,] _dungeonGameObject;
 
@@ -39,49 +40,43 @@ namespace DungeonGeneration
             
             _dungeonGameObject = new GameObject[dungeonWidth, dungeonHeight];
             
-            //TODO document
-            foreach (var room in generator.Dungeon.Rooms)
-                room.TranslateToGlobalGrid(generator.Dungeon.Grid);
+            DrawDungeon(generator.Dungeon);
+        }
 
-            for (int x = 0; x < dungeonWidth; x++)
+        //TODO document
+        private void DrawDungeon(DungeonData dungeon)
+        {
+            foreach (Room room in dungeon.Rooms)
             {
-                for (int y = 0; y < dungeonHeight; y++)
+                room.TranslateToGlobalGrid(dungeon.Grid);
+                GameObject roomGameObject = new GameObject("Room");
+                roomGameObject.transform.SetParent(roomsParent);
+
+                foreach (Vector2Int tile in room.FloorTiles)
                 {
-                    if (generator.Dungeon.Grid[x, y] == 1)
-                        Instantiate(roomFloorTilePrefab, new Vector3(x, y, 0), Quaternion.identity, roomsParent);
-                    else if (generator.Dungeon.Grid[x, y] == 2)
-                        Instantiate(corridorFloorTilePrefab, new Vector3(x, y, 0), Quaternion.identity, corridorsParent);
+                    Vector3 position = new Vector3(tile.x, tile.y, 0);
+                    GameObject floor = Instantiate(floorTilePrefab, position, Quaternion.identity, roomGameObject.transform);
+                    _dungeonGameObject[tile.x, tile.y] = floor;
+                }
+            }
+
+            for (int x = 0; x < dungeon.Width; x++)
+            {
+                for (int y = 0; y < dungeon.Height; y++)
+                {
+                    if (dungeon.Grid[x, y] == 1 && _dungeonGameObject[x, y] == null)
+                    {
+                        Vector3 position = new Vector3(x, y, 0);
+                        GameObject floor = Instantiate(floorTilePrefab, position, Quaternion.identity, corridorsParent);
+                        _dungeonGameObject[x, y] = floor;
+                    }
+                    else if (dungeon.Grid[x, y] == 0)
+                    {
+                        Vector3 position = new Vector3(x, y, 0);
+                        GameObject wall = Instantiate(wallTilePrefab, position, Quaternion.identity, wallsParent);
+                    }
                 }
             }
         }
-
-        // private void Draw(Room room, GameObject floorPrefab, GameObject wallPrefab, string gameObjectName, Transform parent)
-        // {
-        //     int[,] grid = room.Grid;
-        //     int width = grid.GetLength(0);
-        //     int height = grid.GetLength(1);
-        //
-        //     GameObject holder = new GameObject(gameObjectName);
-        //
-        //     for (int x = 0; x < width; x++)
-        //     {
-        //         for (int y = 0; y < height; y++)
-        //         {
-        //             int value = grid[x, y];
-        //             if (value == 1)
-        //             {
-        //                 // Position relative to room
-        //                 Vector3 position = new Vector3(room.Bounds.x + x, room.Bounds.y + y, 0);
-        //                 GameObject tile = Instantiate(floorPrefab, position, Quaternion.identity, holder.transform);
-        //
-        //                 _dungeonGameObject[(int)(room.Bounds.x + x), (int)(room.Bounds.y + y)] = tile;
-        //             }
-        //         }
-        //     }
-        //
-        //     if (holder.transform.childCount > 0)
-        //         holder.transform.SetParent(parent);
-        //     else Destroy(holder);
-        // }
     }
 }

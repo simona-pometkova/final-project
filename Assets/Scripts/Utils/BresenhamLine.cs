@@ -16,7 +16,7 @@ namespace Utils
         /// <param name="start">The starting coordinate of the line.</param>
         /// <param name="end">The ending coordinate of the line.</param>
         /// <param name="thickness">Optional - thickness of the line (measured in cells).</param>
-        public static void Draw(int[,] grid, Vector2Int start, Vector2Int end, int floor = 1, int thickness = 3)
+        public static void Draw(int[,] grid, Vector2Int start, Vector2Int end, int thickness = 3)
         {
             int radius = Maths.Max(0, (thickness - 1) / 2);
             
@@ -41,7 +41,7 @@ namespace Utils
             while (true)
             {
                 // Draw the current point with thickness
-                DrawLineThick(grid, x0, y0, floor, radius);
+                DrawLineThick(grid, x0, y0, radius);
 
                 // End if the end point has been reached
                 if (x0 == x1 && y0 == y1) break;
@@ -71,7 +71,7 @@ namespace Utils
         /// <param name="circleX">The x-coordinate of the circle's center.</param>
         /// <param name="circleY">The y-coordinate of the circle's center.</param>
         /// <param name="radius">The radius of the circle in cells. Determines the "thickness" of the line.</param>
-        private static void DrawLineThick(int[,] grid, int circleX, int circleY, int floor, int radius)
+        private static void DrawLineThick(int[,] grid, int circleX, int circleY, int radius)
         {
             int width = grid.GetLength(0);
             int height = grid.GetLength(1);
@@ -89,7 +89,7 @@ namespace Utils
                     if (nx >= 0 && nx < width && ny >= 0 && ny < height)
                         // If cell is within circle, mark it as floor
                         if (dx * dx + dy * dy <= radius * radius) 
-                            grid[nx, ny] = floor; 
+                            grid[nx, ny] = 1; // floor
                 }
             }
         }

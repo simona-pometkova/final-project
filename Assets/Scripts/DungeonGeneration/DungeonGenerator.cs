@@ -13,7 +13,6 @@ namespace DungeonGeneration
     public class DungeonData
     {
         public readonly List<Room> Rooms = new();
-        public readonly List<Corridor> Corridors = new();
         public int Width { get; }
         public int Height { get; }
         public int MinNodeSize { get; }
@@ -75,9 +74,8 @@ namespace DungeonGeneration
             rootNode.CreateRooms();
             rootNode.CreateCorridors(_dungeon.Grid);
             
-            // Save data about the rooms and corridors of the dungeon
+            // Save rooms data
             GetRooms(rootNode, _dungeon.Rooms);
-            GetCorridors(rootNode, _dungeon.Corridors);
         }
 
         /// <summary>
@@ -122,21 +120,6 @@ namespace DungeonGeneration
                 GetRooms(node.LeftChild, rooms);
                 GetRooms(node.RightChild, rooms);
             }
-        }
-
-        /// <summary>
-        /// Recursively collects all corridors from a BSP tree.
-        /// </summary>
-        /// <param name="node">The current node to process.</param>
-        /// <param name="corridors">The list to which all discovered corridors will be added.</param>
-        private void GetCorridors(BSPNode node, List<Corridor> corridors)
-        {
-            if (node == null) return;
-            
-            corridors.AddRange(node.Corridors);
-            
-            GetCorridors(node.LeftChild, corridors);
-            GetCorridors(node.RightChild, corridors);
         }
     }
 }

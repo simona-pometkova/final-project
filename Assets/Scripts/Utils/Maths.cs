@@ -15,6 +15,7 @@ namespace Utils
         /// <returns></returns>
         public static int ManhattanDistance(Vector2Int a, Vector2Int b) => Mathf.Abs(a.x - b.x) + Mathf.Abs(a.y - b.y);
         
+        //TODO document
         public static int Max(int a, int b) => Mathf.Max(a, b);
     }
 }

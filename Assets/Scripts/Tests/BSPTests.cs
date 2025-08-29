@@ -90,19 +90,6 @@ namespace Tests
         }
 
         /// <summary>
-        /// Tests whether corridors fail to be created
-        /// if dungeon dimensions are too small.
-        /// </summary>
-        [Test]
-        public void Dungeon_NoCorridorsIfDungeonTooSmall()
-        {
-            DungeonGenerator generator = new DungeonGenerator(1, 1, 8, 16);
-            generator.GenerateDungeon();
-            
-            Assert.IsEmpty(generator.Dungeon.Corridors, "No corridors should be generated when dungeon is too small.");
-        }
-
-        /// <summary>
         /// Tests whether a dungeon is successfully generated
         /// (i.e. rooms are created) when its dimensions are large.
         /// </summary>
@@ -136,24 +123,6 @@ namespace Tests
             }
                 
             Assert.AreEqual(leaves.Count, roomsCount, "Some leaves do not have a room.");
-        }
-
-        /// <summary>
-        /// Tests whether any corridors inside the dungeon are duplicated.
-        /// </summary>
-        [Test]
-        public void Corridors_NoDuplicates()
-        {
-            DungeonGenerator generator = new DungeonGenerator(50, 50, 10, 15);
-            generator.GenerateDungeon();
-            
-            HashSet<string> seen = new HashSet<string>();
-
-            foreach (var corridor in generator.Dungeon.Corridors)
-            {
-                string id = $"{corridor.LeftRoom}, {corridor.RightRoom}";
-                Assert.IsTrue(seen.Add(id), $"Duplicate corridor was found: {id}");
-            }
         }
         
         /// <summary>
