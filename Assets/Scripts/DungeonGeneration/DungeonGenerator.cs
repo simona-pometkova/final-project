@@ -14,11 +14,11 @@ namespace DungeonGeneration
     {
         public readonly List<Room> Rooms = new();
         public readonly List<Corridor> Corridors = new();
-        public BSPNode RootNode { get; private set; }
         public int Width { get; }
         public int Height { get; }
         public int MinNodeSize { get; }
         public int MaxNodeSize { get; }
+        public int[,] Grid { get; }
         
         public DungeonData(int width, int height, int minNodeSize, int maxNodeSize)
         {
@@ -26,12 +26,8 @@ namespace DungeonGeneration
             this.Height = height;
             this.MinNodeSize = minNodeSize;
             this.MaxNodeSize = maxNodeSize;
+            this.Grid = new int[width, height];
         }        
-        
-        public void SetRoot(BSPNode root)
-        {
-            this.RootNode = root;
-        }
     }
     
     /// <summary>
@@ -65,20 +61,19 @@ namespace DungeonGeneration
         }
 
         /// <summary>
-        /// Generates a dungeon using the BSP algorithm.
+        /// Generates a dungeon layout using the BSP algorithm.
         /// </summary>
         public void GenerateDungeon()
         {
             // Create the main space (root node in the BSP tree) that takes up the whole size of the dungeon
             BSPNode rootNode = new BSPNode(new Rect(0, 0, _dungeon.Width, _dungeon.Height));
-            this._dungeon.SetRoot(rootNode);
             
             // Recursively partition the dungeon space
             Partition(rootNode);
             
             // Create rooms and corridors
             rootNode.CreateRooms();
-            rootNode.CreateCorridors();
+            rootNode.CreateCorridors(_dungeon.Grid);
             
             // Save data about the rooms and corridors of the dungeon
             GetRooms(rootNode, _dungeon.Rooms);

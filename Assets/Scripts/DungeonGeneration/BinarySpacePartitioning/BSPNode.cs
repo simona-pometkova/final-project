@@ -103,19 +103,6 @@ namespace DungeonGeneration.BinarySpacePartitioning
             _leftChild?.CreateRooms();
             _rightChild?.CreateRooms();
 
-            // If both children exist, connect them with a corridor
-            // if (_leftChild != null && _rightChild != null)
-            // {
-            //     Room leftRoom = _leftChild.GetRoom();
-            //     Room rightRoom = _rightChild.GetRoom();
-            //
-            //     if (leftRoom != null && rightRoom != null)
-            //     {
-            //         Corridor corridor = new Corridor(leftRoom, rightRoom);
-            //         _corridors.Add(corridor);
-            //     }
-            // }
-
             // Ready to hold a room - create one
             if (IsLeaf())
             {
@@ -131,9 +118,23 @@ namespace DungeonGeneration.BinarySpacePartitioning
             }
         }
 
-        public void CreateCorridors()
+        //TODO add documentation
+        public void CreateCorridors(int[,] dungeonGrid)
         {
+            _leftChild?.CreateCorridors(dungeonGrid);
+            _rightChild?.CreateCorridors(dungeonGrid);
+
+            if (_leftChild != null && _rightChild != null)
+            {
+                Room leftRoom = _leftChild.GetRoom();
+                Room rightRoom = _rightChild.GetRoom();
             
+                if (leftRoom != null && rightRoom != null)
+                {
+                    Corridor corridor = new Corridor(leftRoom, rightRoom, dungeonGrid);
+                    _corridors.Add(corridor);
+                }
+            }
         }
         
         /// <summary>

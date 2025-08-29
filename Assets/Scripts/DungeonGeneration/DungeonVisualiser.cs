@@ -38,79 +38,50 @@ namespace DungeonGeneration
             generator.GenerateDungeon();
             
             _dungeonGameObject = new GameObject[dungeonWidth, dungeonHeight];
-
-            // Create GameObjects for each room in the dungeon
-            foreach (var room in generator.Dungeon.Rooms)
-                Draw(room, roomFloorTilePrefab, roomWallTilePrefab, "Room", roomsParent);
-
-            // Create GameObjects for each corridor in the dungeon
-            foreach (var corridor in generator.Dungeon.Corridors)
-                foreach (var segment in corridor.Segments)
-                    DrawTiles(segment, corridorFloorTilePrefab, "Corridor", corridorsParent);
-        }
-
-        /// <summary>
-        /// Fills the specified area of the dungeon grid with tile prefabs,
-        /// unless a tile already exists at a given coordinate.
-        /// The tiles are parented by a common game object that is
-        /// then added to the Unity Scene.
-        /// </summary>
-        /// <param name="rect">The rectangular area to fill with tiles.</param>
-        /// <param name="tilePrefab">The prefab to instantiate for each empty grid coordinate.</param>
-        /// <param name="gameObjectName">The name to give to the game object that holds all tiles.</param>
-        /// <param name="parent">The parent to attach the holder game object to.</param>
-        private void DrawTiles(Rect rect, GameObject tilePrefab, string gameObjectName, Transform parent)
-        {
-            // Create a parent that will hold all tiles that belong
-            // to the same room/corridor
-            GameObject holder = new GameObject(gameObjectName);  
             
-            // Traverse the area
-            for (int i = (int)rect.xMin; i < rect.xMax; i++)
+            //TODO document
+            foreach (var room in generator.Dungeon.Rooms)
+                room.TranslateToGlobalGrid(generator.Dungeon.Grid);
+
+            for (int x = 0; x < dungeonWidth; x++)
             {
-                for (int j = (int)rect.yMin; j < rect.yMax; j++)
+                for (int y = 0; y < dungeonHeight; y++)
                 {
-                    // Don't do anything if the position already contains a tile
-                    if (_dungeonGameObject[i, j] != null) continue;
-                    
-                    // Instantiate tile GameObject and assign it to dungeon coordinate
-                    GameObject tile = Instantiate(tilePrefab, new Vector3(i, j, 0), Quaternion.identity, holder.transform);
-                    _dungeonGameObject[i, j] = tile;
+                    if (generator.Dungeon.Grid[x, y] == 1)
+                        Instantiate(roomFloorTilePrefab, new Vector3(x, y, 0), Quaternion.identity, roomsParent);
+                    else if (generator.Dungeon.Grid[x, y] == 2)
+                        Instantiate(corridorFloorTilePrefab, new Vector3(x, y, 0), Quaternion.identity, corridorsParent);
                 }
             }
-
-            if (holder.transform.childCount > 0)
-                holder.transform.SetParent(parent);
-            else Destroy(holder);
         }
 
-        private void Draw(Room room, GameObject floorPrefab, GameObject wallPrefab, string gameObjectName, Transform parent)
-        {
-            int[,] grid = room.Grid;
-            int width = grid.GetLength(0);
-            int height = grid.GetLength(1);
-
-            GameObject holder = new GameObject(gameObjectName);
-
-            for (int x = 0; x < width; x++)
-            {
-                for (int y = 0; y < height; y++)
-                {
-                    int value = grid[x, y];
-                    if (value == 1)
-                    {
-                        // Position relative to room
-                        Vector3 position = new Vector3(room.Bounds.x + x, room.Bounds.y + y, 0);
-                        GameObject tile = Instantiate(floorPrefab, position, Quaternion.identity, holder.transform);
-
-                        _dungeonGameObject[(int)(room.Bounds.x + x), (int)(room.Bounds.y + y)] = tile;
-                    }
-                }
-            }
-
-            if (holder.transform.childCount > 0)
-                holder.transform.SetParent(parent);
-            else Destroy(holder);
-        }
+        // private void Draw(Room room, GameObject floorPrefab, GameObject wallPrefab, string gameObjectName, Transform parent)
+        // {
+        //     int[,] grid = room.Grid;
+        //     int width = grid.GetLength(0);
+        //     int height = grid.GetLength(1);
+        //
+        //     GameObject holder = new GameObject(gameObjectName);
+        //
+        //     for (int x = 0; x < width; x++)
+        //     {
+        //         for (int y = 0; y < height; y++)
+        //         {
+        //             int value = grid[x, y];
+        //             if (value == 1)
+        //             {
+        //                 // Position relative to room
+        //                 Vector3 position = new Vector3(room.Bounds.x + x, room.Bounds.y + y, 0);
+        //                 GameObject tile = Instantiate(floorPrefab, position, Quaternion.identity, holder.transform);
+        //
+        //                 _dungeonGameObject[(int)(room.Bounds.x + x), (int)(room.Bounds.y + y)] = tile;
+        //             }
+        //         }
+        //     }
+        //
+        //     if (holder.transform.childCount > 0)
+        //         holder.transform.SetParent(parent);
+        //     else Destroy(holder);
+        // }
     }
 }

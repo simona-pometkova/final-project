@@ -84,5 +84,27 @@ namespace Utils
                 mainIsland.AddRange(island);
             }
         }
+
+        //TODO document
+        public static List<Vector2Int> CollectFloorTiles(int[,] grid, Rect bounds)
+        {
+            List<Vector2Int> floorTiles = new();
+
+            for (int localX = 0; localX < grid.GetLength(0); localX++)
+            {
+                for (int localY = 0; localY < grid.GetLength(1); localY++)
+                {
+                    if (grid[localX, localY] == 1)
+                    {
+                        int worldX = (int)bounds.x + localX;
+                        int worldY = (int)bounds.y + localY;
+                        
+                        floorTiles.Add(new Vector2Int(worldX, worldY));
+                    }
+                }
+            }
+
+            return floorTiles;
+        }
     }
 }
