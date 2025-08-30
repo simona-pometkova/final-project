@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using DungeonGeneration.BinarySpacePartitioning;
 using UnityEngine;
+using Utils;
 
 namespace DungeonGeneration
 {
@@ -75,7 +76,7 @@ namespace DungeonGeneration
             rootNode.CreateCorridors(_dungeon.Grid);
             
             // Save rooms data
-            GetRooms(rootNode, _dungeon.Rooms);
+            CollectRooms(rootNode, _dungeon.Rooms);
         }
 
         /// <summary>
@@ -88,7 +89,7 @@ namespace DungeonGeneration
             // Check if node should be split (either too big or randomly decided)
             if (node.NodeBounds.width > _dungeon.MaxNodeSize      
                 || node.NodeBounds.height > _dungeon.MaxNodeSize
-                || Random.Range(0.0f, 1.0f) > SplitChanceThreshold) 
+                || Maths.GetRandomFloat(0.0f, 1.0f) > SplitChanceThreshold) 
             {
                 // If the sub-dungeon was successfully split, proceed to recursively partition its children
                 if (node.Split(_dungeon.MinNodeSize))
@@ -104,7 +105,7 @@ namespace DungeonGeneration
         /// </summary>
         /// <param name="node">The current node to process.</param>
         /// <param name="rooms">The list to which all discovered rooms will be added.</param>
-        private void GetRooms(BSPNode node, List<Room> rooms)
+        private void CollectRooms(BSPNode node, List<Room> rooms)
         {
             if (node == null) return;
 
@@ -117,8 +118,8 @@ namespace DungeonGeneration
             }
             else
             {
-                GetRooms(node.LeftChild, rooms);
-                GetRooms(node.RightChild, rooms);
+                CollectRooms(node.LeftChild, rooms);
+                CollectRooms(node.RightChild, rooms);
             }
         }
     }

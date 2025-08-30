@@ -1,6 +1,5 @@
 using DungeonGeneration.BinarySpacePartitioning;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace DungeonGeneration
 {
@@ -40,43 +39,53 @@ namespace DungeonGeneration
             
             _dungeonGameObject = new GameObject[dungeonWidth, dungeonHeight];
             
+            // Draw the dungeon into Unity
             DrawDungeon(generator.Dungeon);
         }
 
-        //TODO document
+        /// <summary>
+        /// Draws the dungeon into the Unity Scene by instantiating
+        /// appropriate tile GameObjects (1 - floor, 0 - wall) on each coordinate.
+        /// </summary>
+        /// <param name="dungeon">The dungeon data to use.</param>
         private void DrawDungeon(DungeonData dungeon)
         {
+            // First draw all room tiles
             foreach (Room room in dungeon.Rooms)
             {
+                // Local room grid to world dungeon grid
                 room.TranslateToGlobalGrid(dungeon.Grid);
                 GameObject roomGameObject = new GameObject("Room");
                 roomGameObject.transform.SetParent(roomsParent);
 
+                // Create a GameObject for each floor tile of the room
                 foreach (Vector2Int tile in room.FloorTiles)
-                {
-                    Vector3 position = new Vector3(tile.x, tile.y, 0);
-                    GameObject floor = Instantiate(floorTilePrefab, position, Quaternion.identity, roomGameObject.transform);
-                    _dungeonGameObject[tile.x, tile.y] = floor;
-                }
+                    CreateGameObject(floorTilePrefab, tile.x, tile.y, roomGameObject.transform);
             }
 
+            // Iterate over dungeon and fill out 
+            // corridors and walls on the remaining empty coordinates
             for (int x = 0; x < dungeon.Width; x++)
-            {
                 for (int y = 0; y < dungeon.Height; y++)
-                {
                     if (dungeon.Grid[x, y] == 1 && _dungeonGameObject[x, y] == null)
-                    {
-                        Vector3 position = new Vector3(x, y, 0);
-                        GameObject floor = Instantiate(floorTilePrefab, position, Quaternion.identity, corridorsParent);
-                        _dungeonGameObject[x, y] = floor;
-                    }
+                        CreateGameObject(floorTilePrefab, x, y, corridorsParent);
                     else if (dungeon.Grid[x, y] == 0)
-                    {
-                        Vector3 position = new Vector3(x, y, 0);
-                        GameObject wall = Instantiate(wallTilePrefab, position, Quaternion.identity, wallsParent);
-                    }
-                }
-            }
+                        CreateGameObject(wallTilePrefab, x, y, wallsParent);
+        }
+
+        /// <summary>
+        /// Instantiates a GameObject and updates
+        /// the main dungeon GameObject.
+        /// </summary>
+        /// <param name="prefab">The prefab to use for instantiation.</param>
+        /// <param name="positionX">The x-position to instantiate the GameObject on.</param>
+        /// <param name="positionY">The y-position to instantiate the GameObject on.</param>
+        /// <param name="parent">The parent of the GameObject.</param>
+        private void CreateGameObject(GameObject prefab, int positionX, int positionY, Transform parent)
+        {
+            Vector3 position = new Vector3(positionX, positionY, 0);
+            GameObject go = Instantiate(prefab, position, Quaternion.identity, parent);
+            _dungeonGameObject[positionX, positionY] = go;
         }
     }
 }

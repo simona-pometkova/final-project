@@ -56,27 +56,9 @@ namespace Utils
             {
                 List<Vector2Int> island = islands[i];
 
-                Vector2Int closestTileMain = Vector2Int.zero;
-                Vector2Int closestTileCurrent = Vector2Int.zero;
+                // Find the closest pair of tiles between the main island and the current island
+                (Vector2Int closestTileMain, Vector2Int closestTileCurrent) = FindClosestTiles(mainIsland, island);
                 
-                int closestDistance = int.MaxValue;
-
-                // Find the closest pair of tiles between main island and current island
-                foreach (var floorTileMain in mainIsland)
-                {
-                    foreach (var floorTileCurrent in island)
-                    {
-                        int distance = Maths.ManhattanDistance(floorTileMain, floorTileCurrent);
-                        
-                        // Update shortest distance & floors
-                        if (distance < closestDistance)
-                        {
-                            closestDistance = distance;
-                            closestTileMain = floorTileMain;
-                            closestTileCurrent = floorTileCurrent;
-                        }
-                    }
-                }
                 // Carve a corridor between the closest pair of tiles
                 BresenhamLine.Draw(grid, closestTileMain, closestTileCurrent);
                 
@@ -84,69 +66,91 @@ namespace Utils
                 mainIsland.AddRange(island);
             }
         }
-
-        //TODO document
+        
+        /// <summary>
+        /// Collects all floor tiles (1) from a grid and converts
+        /// their local coordinates into world coordinates based on the given bounds.
+        /// </summary>
+        /// <param name="grid">The 2D integer array representing the local grid.</param>
+        /// <param name="bounds">The rectangular bounds of the grid in world space.</param>
+        /// <returns>A list of positions representing the world coordinates of all discovered floor tiles.</returns>
         public static List<Vector2Int> CollectFloorTiles(int[,] grid, Rect bounds)
         {
             List<Vector2Int> floorTiles = new();
 
+            // Iterate over local grid
             for (int localX = 0; localX < grid.GetLength(0); localX++)
-            {
                 for (int localY = 0; localY < grid.GetLength(1); localY++)
-                {
-                    if (grid[localX, localY] == 1)
+                    // Coordinate is a floor
+                    if (grid[localX, localY] == 1) 
                     {
+                        // Convert to world coordinates and add to list
                         int worldX = (int)bounds.x + localX;
                         int worldY = (int)bounds.y + localY;
                         
                         floorTiles.Add(new Vector2Int(worldX, worldY));
                     }
-                }
-            }
 
             return floorTiles;
         }
 
-        //TODO document
+        /// <summary>
+        /// Connect two rooms by carving an L-shaped corridor
+        /// between their closest floor tiles.
+        /// </summary>
+        /// <param name="dungeonGrid">The 2D integer array representing the dungeon. Modified in place.</param>
+        /// <param name="leftRoomTiles">A list of positions representing the floor tiles of the first room.</param>
+        /// <param name="rightRoomTiles">A list of positions representing the floor tiles of the second room.</param>
         public static void ConnectRooms(int[,] dungeonGrid, List<Vector2Int> leftRoomTiles,
             List<Vector2Int> rightRoomTiles)
         {
-            // 1. Find closest tiles between the two rooms
+            // Find the closest pair tiles between the two rooms
             (Vector2Int start, Vector2Int end) = FindClosestTiles(leftRoomTiles, rightRoomTiles);
 
-            // 2. Pick an L-shaped corner (horizontal then vertical OR vertical then horizontal)
+            // Pick an L-shaped corner (horizontal then vertical or vertical then horizontal)
             Vector2Int corner;
             if (Random.value < 0.5f)
-                corner = new Vector2Int(end.x, start.y); // horizontal first
+                // Horizontal first
+                corner = new Vector2Int(end.x, start.y); 
             else
-                corner = new Vector2Int(start.x, end.y); // vertical first
+                // Vertical first
+                corner = new Vector2Int(start.x, end.y); 
 
             BresenhamLine.Draw(dungeonGrid, start, corner);
             BresenhamLine.Draw(dungeonGrid, corner, end);
         }
         
-        //TODO document
-        private static (Vector2Int a, Vector2Int b) FindClosestTiles(List<Vector2Int> leftRoomTiles, List<Vector2Int> rightRoomTiles)
+        /// <summary>
+        /// Finds the closest pair of floor tiles between
+        /// two sets of tiles using Manhattan distance.
+        /// </summary>
+        /// <param name="tilesA">A list of positions representing the first set of tiles.</param>
+        /// <param name="tilesB">A list of positions representing the second set of tiles.</param>
+        /// <returns>A tuple containing the two closest tiles from the first and second set, respectively.</returns>
+        private static (Vector2Int a, Vector2Int b) FindClosestTiles(List<Vector2Int> tilesA, List<Vector2Int> tilesB)
         {
-            Vector2Int closestA = Vector2Int.zero;
-            Vector2Int closestB = Vector2Int.zero;
-            int bestDist = int.MaxValue;
+            Vector2Int closestTileA = Vector2Int.zero;
+            Vector2Int closestTileB = Vector2Int.zero;
             
-            foreach (var tileA in leftRoomTiles)
-            {
-                foreach (var tileB in rightRoomTiles)
+            int closestDistance = int.MaxValue;
+            
+            // Iterate over tiles
+            foreach (var tileA in tilesA)
+                foreach (var tileB in tilesB)
                 {
-                    int dist = Maths.ManhattanDistance(tileA, tileB);
-                    if (dist < bestDist)
+                    // Calculate distance 
+                    int distance = Maths.ManhattanDistance(tileA, tileB);
+                    
+                    // Update if shorter distance was found
+                    if (distance < closestDistance)
                     {
-                        bestDist = dist;
-                        closestA = tileA;
-                        closestB = tileB;
+                        closestDistance = distance;
+                        closestTileA = tileA;
+                        closestTileB = tileB;
                     }
                 }
-            }
 
-            return (closestA, closestB);
+            return (closestTileA, closestTileB);
         }
     }
 }

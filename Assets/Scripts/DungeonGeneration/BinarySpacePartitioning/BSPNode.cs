@@ -93,8 +93,7 @@ namespace DungeonGeneration.BinarySpacePartitioning
         }
 
         /// <summary>
-        /// Recursively creates rooms in each node of the BSP tree,
-        /// and connects sibling nodes with corridors.
+        /// Recursively creates rooms in each node of the BSP tree.
         /// </summary>
         public void CreateRooms()
         {
@@ -117,9 +116,15 @@ namespace DungeonGeneration.BinarySpacePartitioning
             }
         }
 
-        //TODO add documentation
+        /// <summary>
+        /// Recursively creates corridors by connecting
+        /// sibling rooms in the BSP tree.
+        /// </summary>
+        /// <param name="dungeonGrid">The grid to carve corridors onto.</param>
         public void CreateCorridors(int[,] dungeonGrid)
         {
+            // If the node has children, create corridors
+            // recursively in their subtrees too
             _leftChild?.CreateCorridors(dungeonGrid);
             _rightChild?.CreateCorridors(dungeonGrid);
 
@@ -128,15 +133,15 @@ namespace DungeonGeneration.BinarySpacePartitioning
                 Room leftRoom = _leftChild.GetRoom();
                 Room rightRoom = _rightChild.GetRoom();
             
+                // Connect sibling rooms
                 if (leftRoom != null && rightRoom != null)
-                {
                     Connectivity.ConnectRooms(dungeonGrid, leftRoom.FloorTiles, rightRoom.FloorTiles);
-                }
             }
         }
         
         /// <summary>
-        /// Recursively retrieves the first valid room contained within this BSP node or its children.
+        /// Recursively retrieves the first valid room contained
+        /// within this BSP node or its children.
         /// </summary>
         /// <returns>The first valid room found in this node or its children. Null room if no room exists.</returns>
         public Room GetRoom()
@@ -157,26 +162,6 @@ namespace DungeonGeneration.BinarySpacePartitioning
 
             // No room is found
             return null;
-        }
-
-        /// <summary>
-        /// Recursively traverses the BSP tree and returns all leaf nodes.
-        /// </summary>
-        /// <returns>A list containing all leaf nodes in the BSP subtree rooted at this node.</returns>
-        public List<BSPNode> GetLeafNodes()
-        {
-            List<BSPNode> leaves = new();
-
-            // If this node is a leaf, add it to the list
-            if (IsLeaf()) leaves.Add(this);
-            else
-            {
-                // This node is not a leaf - traverse its children and get the leaf nodes inside of them
-                if (_leftChild != null) leaves.AddRange(_leftChild.GetLeafNodes());
-                if (_rightChild != null) leaves.AddRange(_rightChild.GetLeafNodes());
-            }
-
-            return leaves;
         }
     }
 }

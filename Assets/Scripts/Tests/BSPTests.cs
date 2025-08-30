@@ -111,7 +111,7 @@ namespace Tests
         {
             BSPNode root = new BSPNode(new Rect(0, 0, 32, 32));
             root.CreateRooms();
-            List<BSPNode> leaves = root.GetLeafNodes();
+            List<BSPNode> leaves = GetLeafNodes(root);
             int roomsCount = 0;
 
             foreach (var leaf in leaves)
@@ -137,6 +137,28 @@ namespace Tests
             Room room = node.GetRoom();
 
             Assert.IsTrue(node.NodeBounds.Overlaps(room.Bounds), "Room does not fit inside node bounds.");
+        }
+        
+        /// <summary>
+        /// Recursively traverses the BSP tree and returns all leaf nodes.
+        /// </summary>
+        /// <param name="node">The node to start traversing the BSP tree from.</param>
+        /// <returns>A list containing all leaf nodes in the BSP subtree rooted at this node.</returns>
+        //TODO is this the correct place for this method?
+        public List<BSPNode> GetLeafNodes(BSPNode node)
+        {
+            List<BSPNode> leaves = new();
+
+            // If this node is a leaf, add it to the list
+            if (node.IsLeaf()) leaves.Add(node);
+            else
+            {
+                // This node is not a leaf - traverse its children and get the leaf nodes inside of them
+                if (node.LeftChild != null) leaves.AddRange(GetLeafNodes(node.LeftChild));
+                if (node.RightChild != null) leaves.AddRange(GetLeafNodes(node.RightChild));
+            }
+
+            return leaves;
         }
     }
 }
