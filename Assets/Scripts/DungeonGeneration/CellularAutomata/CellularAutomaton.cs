@@ -48,13 +48,9 @@
 
             // Fill the grid with random floors/walls based on Density
             for (int x = 0; x < width; x++)
-            {
                 for (int y = 0; y < height; y++)
-                {
                     // Floor (1) if roll is below Density threshold, otherwise wall (0)
                     noiseGrid[x, y] = random.Next(0, 100) < density ? 1 : 0; 
-                }
-            }
 
             return noiseGrid;
         }
@@ -94,7 +90,6 @@
 
                 // Evaluate each cell in the grid
                 for (int x = 0; x < width; x++)
-                {
                     for (int y = 0; y < height; y++)
                     {
                         int wallNeighbors = CountWallNeighbors(grid, x, y);
@@ -107,7 +102,6 @@
                         else // current cell is a floor
                             newGrid[x, y] = wallNeighbors >= BirthLimit ? 0 : 1;
                     }
-                }
 
                 // Replace the noise grid with the updated one for the next iteration
                 grid = newGrid;
@@ -143,7 +137,7 @@
                     if (neighborX == x && neighborY == y) continue;
 
                     // Out-of-bound cells count as walls
-                    if (neighborX < 0 || neighborY < 0 || neighborX >= width || neighborY >= height)
+                    if (neighborX < 0 || neighborY < 0 || neighborX >= width || neighborY >= height) 
                         count++;
                     
                     // Inside bounds: increment if the neighbor is a wall

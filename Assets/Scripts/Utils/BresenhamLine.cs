@@ -78,7 +78,6 @@ namespace Utils
             
             // Iterate over a square bounding box centered at (cx, cy) with side length 2*r + 1
             for (int dx = -radius; dx <= radius; dx++)
-            {
                 for (int dy = -radius; dy <= radius; dy++)
                 {
                     // Absolute coordinates
@@ -91,7 +90,6 @@ namespace Utils
                         if (dx * dx + dy * dy <= radius * radius) 
                             grid[nx, ny] = 1; // floor
                 }
-            }
         }
     }
 }

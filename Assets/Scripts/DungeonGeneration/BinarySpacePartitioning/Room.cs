@@ -15,10 +15,6 @@ namespace DungeonGeneration.BinarySpacePartitioning
         // Position and dimensions of the room.
         public Rect Bounds { get; }
         
-        // The local room grid of wall/floor cells.
-        // Used by Cellular Automata for smoothing.
-        public int[,] Grid { get; }
-        
         public List<Vector2Int> FloorTiles { get; }
 
         /// <summary>
@@ -35,13 +31,13 @@ namespace DungeonGeneration.BinarySpacePartitioning
             // Apply local CA smoothing to the room:
             // // 1. Generate a noise grid
             // // 2. Smooth out using CA rules
-            this.Grid = CellularAutomaton.GenerateNoiseGrid(width, height);
-            this.Grid = CellularAutomaton.ApplyRules(this.Grid);
+            int[,] grid = CellularAutomaton.GenerateNoiseGrid(width, height);
+            grid = CellularAutomaton.ApplyRules(grid);
 
             // Post-process CA smoothing to connect isolated islands of floor
-            var islands = Connectivity.FindRoomIslands(this.Grid);
-            Connectivity.ConnectRoomIslands(this.Grid, islands);
-            this.FloorTiles = Connectivity.CollectFloorTiles(this.Grid, this.Bounds);
+            List<List<Vector2Int>> islands = Connectivity.FindRoomIslands(grid);
+            Connectivity.ConnectRoomIslands(grid, islands);
+            this.FloorTiles = Connectivity.CollectFloorTiles(grid, this.Bounds);
         }
 
         /// <summary>

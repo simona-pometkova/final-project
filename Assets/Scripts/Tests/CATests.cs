@@ -56,6 +56,121 @@ namespace Tests
             Assert.AreEqual(width, grid.GetLength(0), "Grid width is incorrect.");
             Assert.AreEqual(height, grid.GetLength(1), "Grid height is incorrect.");
         }
+
+        /// <summary>
+        /// Tests whether a uniform wall (0's) grid
+        /// remains all walls after applying CA rules.
+        /// </summary>
+        [Test]
+        public void CA_AllWallsStayWalls()
+        {
+            int[,] noiseGrid = new int[5, 5]; // all walls (0's)
+            int[,] result = CellularAutomaton.ApplyRules(noiseGrid);
+            
+            for (int x = 0; x < 5; x++)
+                for (int y = 0; y < 5; y++)
+                    Assert.AreEqual(0, result[x, y], "A noise grid with all walls should result in a grid with all walls.");
+        }
+
+        /// <summary>
+        /// Tests whether a uniform floor (1's) grid
+        /// remains all floors after applying CA rules.
+        /// </summary>
+        [Test]
+        public void CA_AllFloorsStayFloors()
+        {
+            int[,] noiseGrid = new int[5, 5];
+            
+            for (int x = 0; x < 5; x++)
+                for (int y = 0; y < 5; y++)
+                    noiseGrid[x, y] = 1; // floor
+            
+            int[,] result = CellularAutomaton.ApplyRules(noiseGrid);
+            
+            for (int x = 0; x < 5; x++)
+                for (int y = 0; y < 5; y++)
+                    Assert.AreEqual(1, result[x, y], "A noise grid with all floors should result in a grid with all floors.");
+        }
+
+        /// <summary>
+        /// Tests the Survival Limit rule:
+        /// A wall with too few wall neighbors should become a floor.
+        /// </summary>
+        [Test]
+        public void CA_SurvivalLimit_WallBecomesFloor()
+        {
+            // Tests the center cell (coords [1,1])
+            int[,] noiseGrid =
+            {
+                { 1, 1, 1 },
+                { 1, 0, 1 },
+                { 1, 1, 1 }
+            };
+            
+            int[,] result = CellularAutomaton.ApplyRules(noiseGrid);
+            
+            Assert.AreEqual(1, result[1, 1], "Wall with too few wall neighbors should become a floor.");
+        }
+
+        /// <summary>
+        /// Tests the Survival Limit rule:
+        /// A wall with enough wall neighbors should remain a wall.
+        /// </summary>
+        [Test]
+        public void CA_SurvivalLimit_WallStaysWall()
+        {
+            // Tests the center cell (coords [1,1])
+            int[,] noiseGrid =
+            {
+                { 0, 0, 0 },
+                { 0, 0, 0 },
+                { 0, 0, 0 }
+            };
+            
+            int[,] result = CellularAutomaton.ApplyRules(noiseGrid);
+
+            Assert.AreEqual(0, result[1, 1], "Wall with enough wall neighbors should remain a wall.");
+        }
+
+        /// <summary>
+        /// Tests the Birth Limit rule:
+        /// A floor with too many wall neighbors should become a wall.
+        /// </summary>
+        [Test]
+        public void CA_BirthLimit_FloorBecomesWall()
+        {
+            // Floor wall in center, surrounded by 8 walls
+            int[,] noiseGrid =
+            {
+                { 0, 0, 0 },
+                { 0, 1, 0 },
+                { 0, 0, 0 }
+            };
+            
+            int[,] result = CellularAutomaton.ApplyRules(noiseGrid);
+            
+            Assert.AreEqual(0, result[1, 1], "Floor with too many wall neighbors should become a wall.");
+        }
+
+        /// <summary>
+        /// Tests the Birth Limit rule:
+        /// A floor with enough floor neighbors should remain a floor.
+        /// </summary>
+        [Test]
+        public void CA_BirthLimit_FloorStaysFloor()
+        {
+            // Floor wall in center with only 2 wall neighbors
+            int[,] noiseGrid =
+            {
+                { 1, 1, 1 },
+                { 1, 1, 0 },
+                { 0, 1, 1 }
+            };
+            
+            int[,] result = CellularAutomaton.ApplyRules(noiseGrid);
+            
+            Assert.AreEqual(1, result[1, 1], "Floor with enough floor neighbors should remain a floor.");
+        }
     }
 }
 
