@@ -74,42 +74,47 @@ namespace Tests
 
         /// <summary>
         /// Tests whether a uniform floor (1's) grid
-        /// remains all floors after applying CA rules.
+        /// remains all floors (interior cells only)
+        /// after smoothing. Out-of-bounds neighbors
+        /// are treated as walls.
         /// </summary>
         [Test]
-        public void CA_AllFloorsStayFloors()
+        public void CA_AllFloors_InteriorStayFloors()
         {
-            int[,] noiseGrid = new int[5, 5];
+            int[,] noiseGrid = new int[10, 10];
             
-            for (int x = 0; x < 5; x++)
-                for (int y = 0; y < 5; y++)
+            for (int x = 0; x < 10; x++)
+                for (int y = 0; y < 10; y++)
                     noiseGrid[x, y] = 1; // floor
             
             int[,] result = CellularAutomaton.ApplyRules(noiseGrid);
             
-            for (int x = 0; x < 5; x++)
-                for (int y = 0; y < 5; y++)
-                    Assert.AreEqual(1, result[x, y], "A noise grid with all floors should result in a grid with all floors.");
+            for (int x = 1; x < 9; x++)
+                for (int y = 1; y < 9; y++)
+                    Assert.AreEqual(1, result[x, y], "A noise grid with all floors should result in a grid where all interior cells are floors.");
         }
 
         /// <summary>
         /// Tests the Survival Limit rule:
         /// A wall with too few wall neighbors should become a floor.
+        /// Out-of-bounds neighbors are treated as walls.
         /// </summary>
         [Test]
         public void CA_SurvivalLimit_WallBecomesFloor()
         {
-            // Tests the center cell (coords [1,1])
+            // Tests the center cell (coords [2,2])
             int[,] noiseGrid =
             {
-                { 1, 1, 1 },
-                { 1, 0, 1 },
-                { 1, 1, 1 }
+                { 1, 1, 1, 1, 1},
+                { 1, 1, 1, 0, 1},
+                { 1, 1, 0, 1, 1},
+                { 1, 0, 1, 1, 1},
+                { 1, 1, 1, 1, 1}
             };
             
-            int[,] result = CellularAutomaton.ApplyRules(noiseGrid);
+            int[,] result = CellularAutomaton.ApplyRules(noiseGrid, 1);
             
-            Assert.AreEqual(1, result[1, 1], "Wall with too few wall neighbors should become a floor.");
+            Assert.AreEqual(1, result[2, 2], "Wall with too few wall neighbors should become a floor.");
         }
 
         /// <summary>
@@ -119,17 +124,19 @@ namespace Tests
         [Test]
         public void CA_SurvivalLimit_WallStaysWall()
         {
-            // Tests the center cell (coords [1,1])
+            // Tests the center cell (coords [2,2])
             int[,] noiseGrid =
             {
-                { 0, 0, 0 },
-                { 0, 0, 0 },
-                { 0, 0, 0 }
+                { 0, 0, 0, 0, 1},
+                { 1, 0, 0, 1, 1},
+                { 1, 0, 0, 1, 0},
+                { 1, 0, 0, 0, 0},
+                { 1, 0, 1, 1, 1}
             };
             
-            int[,] result = CellularAutomaton.ApplyRules(noiseGrid);
+            int[,] result = CellularAutomaton.ApplyRules(noiseGrid, 1);
 
-            Assert.AreEqual(0, result[1, 1], "Wall with enough wall neighbors should remain a wall.");
+            Assert.AreEqual(0, result[2, 2], "Wall with enough wall neighbors should remain a wall.");
         }
 
         /// <summary>
@@ -139,37 +146,42 @@ namespace Tests
         [Test]
         public void CA_BirthLimit_FloorBecomesWall()
         {
-            // Floor wall in center, surrounded by 8 walls
+            // Tests the center cell (coords [2,2])
             int[,] noiseGrid =
             {
-                { 0, 0, 0 },
-                { 0, 1, 0 },
-                { 0, 0, 0 }
+                { 0, 0, 0, 0, 0 },
+                { 0, 0, 0, 1, 0 },
+                { 0, 0, 1, 0, 0 },
+                { 0, 1, 0, 0, 0 },
+                { 0, 0, 0, 0, 0 }
             };
             
-            int[,] result = CellularAutomaton.ApplyRules(noiseGrid);
+            int[,] result = CellularAutomaton.ApplyRules(noiseGrid, 1);
             
-            Assert.AreEqual(0, result[1, 1], "Floor with too many wall neighbors should become a wall.");
+            Assert.AreEqual(0, result[2, 2], "Floor with too many wall neighbors should become a wall.");
         }
 
         /// <summary>
         /// Tests the Birth Limit rule:
         /// A floor with enough floor neighbors should remain a floor.
+        /// Out-of-bounds neighbors are treated as walls.
         /// </summary>
         [Test]
         public void CA_BirthLimit_FloorStaysFloor()
         {
-            // Floor wall in center with only 2 wall neighbors
+            // Tests the center cell (coords [2,2])
             int[,] noiseGrid =
             {
-                { 1, 1, 1 },
-                { 1, 1, 0 },
-                { 0, 1, 1 }
+                { 0, 0, 0, 0, 0},
+                { 0, 1, 1, 0, 0},
+                { 0, 1, 1, 1, 0},
+                { 0, 0, 1, 1, 0},
+                { 0, 0, 0, 0, 0}
             };
             
-            int[,] result = CellularAutomaton.ApplyRules(noiseGrid);
+            int[,] result = CellularAutomaton.ApplyRules(noiseGrid, 1);
             
-            Assert.AreEqual(1, result[1, 1], "Floor with enough floor neighbors should remain a floor.");
+            Assert.AreEqual(1, result[2, 2], "Floor with enough floor neighbors should remain a floor.");
         }
     }
 }

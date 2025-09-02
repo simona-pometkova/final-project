@@ -73,17 +73,18 @@
         /// into cave-like structures.
         /// </summary>
         /// <param name="grid">The binary grid (0 = wall, 1 = floor) to process.</param>
+        /// <param name="iterations">How many iterations the cellular automaton will run.</param>
         /// <returns>
         /// A new grid after applying the Cellular Automaton rules for 
         /// the configured number of iterations.
         /// </returns>
-        public static int[,] ApplyRules(int[,] grid)
+        public static int[,] ApplyRules(int[,] grid, int iterations = Iterations)
         {
             int width = grid.GetLength(0);
             int height = grid.GetLength(1);
 
             // Repeat the smoothing process for the configured number of iterations
-            for (int i = 0; i < Iterations; i++)
+            for (int i = 0; i < iterations; i++)
             {
                 // Use a new grid each iteration so updates don’t affect neighbor checks mid-step
                 int[,] newGrid = new int[width, height];
