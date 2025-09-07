@@ -5,19 +5,35 @@ namespace Gameplay.Agents
 {
     public class PlayerAgent : Agent 
     {
-        [Header("Movement")]
-        [SerializeField] private float moveSpeed = 5f;
+        public bool IsCurrentlySelected { get; private set; }
 
-        private Rigidbody2D _rb;
+        // TODO
+        public static event Action<PlayerAgent> OnSelected;
 
-        private void Awake()
+        protected override void Awake()
         {
-            _rb = GetComponent<Rigidbody2D>();
+            base.Awake();
+            OnSelected += Deselect;
         }
 
-        private void Update()
+        protected override void Update()
         {
-            HandleMovement();
+            if (IsCurrentlySelected)
+                HandleMovement();
+            else
+                base.Update();
+        }
+
+        private void OnDisable()
+        {
+            OnSelected -= Deselect;
+        }
+
+        // TODO
+        private void OnMouseDown()
+        {
+            IsCurrentlySelected = true;
+            OnSelected?.Invoke(this);
         }
 
         private void HandleMovement()
@@ -28,6 +44,13 @@ namespace Gameplay.Agents
             Vector2 moveDir = new Vector2(moveX, moveY).normalized;
 
             _rb.linearVelocity = moveDir * moveSpeed;
+        }
+
+        // TODO
+        private void Deselect(PlayerAgent agent)
+        {
+            if (agent != this)
+                IsCurrentlySelected = false;
         }
     }
 }
