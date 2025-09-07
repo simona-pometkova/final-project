@@ -1,22 +1,14 @@
+using DungeonGeneration;
 using DungeonGeneration.BinarySpacePartitioning;
 using UnityEngine;
 
-namespace DungeonGeneration
+namespace Gameplay
 {
     /// <summary>
-    /// A Unity class that holds configurable values for the dungeon
-    /// generation and visualises everything in the Scene via GameObjects.
+    /// Handles visualisation of dungeon data into Unity scene.
     /// </summary>
-    public class DungeonVisualiser : MonoBehaviour
+    public class DungeonRenderer : MonoBehaviour
     {
-        [Header("Dungeon Size")]
-        [SerializeField] private int dungeonWidth = 50;
-        [SerializeField] private int dungeonHeight = 50;
-    
-        [Header("Node & Room Settings")]
-        [SerializeField] private int minNodeSize = 10; 
-        [SerializeField] private int maxNodeSize = 20;
-    
         [Header("Prefabs")]
         [SerializeField] private GameObject floorTilePrefab;
         [SerializeField] private GameObject wallTilePrefab;
@@ -29,27 +21,14 @@ namespace DungeonGeneration
         private GameObject[,] _dungeonGameObject;
 
         /// <summary>
-        /// Main entry point — generates a dungeon and visualises it in the Unity Scene.
-        /// </summary>
-        private void Start()
-        {
-            // Create a dungeon generator object and generate a dungeon
-            DungeonGenerator generator = new DungeonGenerator(dungeonWidth, dungeonHeight, minNodeSize, maxNodeSize);
-            generator.GenerateDungeon();
-            
-            _dungeonGameObject = new GameObject[dungeonWidth, dungeonHeight];
-            
-            // Draw the dungeon into Unity
-            DrawDungeon(generator.Dungeon);
-        }
-
-        /// <summary>
         /// Draws the dungeon into the Unity Scene by instantiating
         /// appropriate tile GameObjects (1 - floor, 0 - wall) on each coordinate.
         /// </summary>
         /// <param name="dungeon">The dungeon data to use.</param>
-        private void DrawDungeon(DungeonData dungeon)
+        public void DrawDungeon(DungeonData dungeon)
         {
+            _dungeonGameObject = new GameObject[dungeon.Width, dungeon.Height];
+
             // First draw all room tiles
             foreach (Room room in dungeon.Rooms)
             {
@@ -81,7 +60,7 @@ namespace DungeonGeneration
         /// <param name="positionX">The x-position to instantiate the GameObject on.</param>
         /// <param name="positionY">The y-position to instantiate the GameObject on.</param>
         /// <param name="parent">The parent of the GameObject.</param>
-        private void CreateGameObject(GameObject prefab, int positionX, int positionY, Transform parent)
+        public void CreateGameObject(GameObject prefab, int positionX, int positionY, Transform parent)
         {
             Vector3 position = new Vector3(positionX, positionY, 0);
             GameObject go = Instantiate(prefab, position, Quaternion.identity, parent);
