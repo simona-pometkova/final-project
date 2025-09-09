@@ -50,12 +50,29 @@ namespace Gameplay.Camera
         // Or maybe FixedUpdate?
         private void Update()
         {
+            // Zoom camera with mouse scroll wheel
+            float scroll = Input.GetAxis("Mouse ScrollWheel");
+
+            if (Math.Abs(scroll) > 0.01f)
+            {
+                _camera.orthographicSize -= scroll * zoomSpeed;
+
+                // Constrain zoom amount
+                _camera.orthographicSize = Mathf.Clamp(_camera.orthographicSize, minZoom, maxZoom);
+            }
+
             // TODO how do I deselect and return to free camera movement?
             if (_targetAgent != null)
             {
                 Vector3 targetPosition = _targetAgent.transform.position;
                 targetPosition.z = transform.position.z;
                 transform.position = Vector3.Lerp(transform.position, targetPosition, movementSpeed * Time.deltaTime);
+
+                if (Input.GetKeyDown(KeyCode.Escape))
+                {
+                    _targetAgent.Deselect();
+                    _targetAgent = null;
+                }
             }
             else
             {
@@ -78,17 +95,6 @@ namespace Gameplay.Camera
                 movement.Normalize();
 
                 transform.position += movement * (movementSpeed * Time.deltaTime);
-
-                // Zoom camera with mouse scroll wheel
-                float scroll = Input.GetAxis("Mouse ScrollWheel");
-
-                if (Math.Abs(scroll) > 0.01f)
-                {
-                    _camera.orthographicSize -= scroll * zoomSpeed;
-
-                    // Constrain zoom amount
-                    _camera.orthographicSize = Mathf.Clamp(_camera.orthographicSize, minZoom, maxZoom);
-                }
             }
         }
     }

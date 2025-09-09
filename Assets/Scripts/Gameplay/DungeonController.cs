@@ -1,5 +1,6 @@
 ﻿using DungeonGeneration;
 using DungeonGeneration.BinarySpacePartitioning;
+using Gameplay.Interactables;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -41,7 +42,7 @@ namespace Gameplay
             renderer.DrawDungeon(_dungeon);
 
             // TODO hard-code to spawn multiple agents
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; i < 10; i++)
                 SpawnAgents(_dungeon.Rooms);
         }
 
@@ -49,8 +50,16 @@ namespace Gameplay
         private void SpawnAgents(List<Room> rooms)
         {
             Vector2Int spawnTile = rooms[0].FloorTiles[Random.Range(0, rooms[0].FloorTiles.Count)];
-            Vector3 spawnPosition = new Vector3(spawnTile.x + 0.5f, spawnTile.y + 0.5f, 0);
+            Vector3 spawnPosition = new Vector3(spawnTile.x, spawnTile.y, 0);
             Instantiate(playerAgent, spawnPosition, Quaternion.identity, parent);
+        }
+
+        private void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.E))
+            {
+                Object.FindFirstObjectByType<Torch>().Toggle();
+            }
         }
     }
 }

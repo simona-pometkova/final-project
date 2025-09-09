@@ -50,7 +50,12 @@ namespace Gameplay.Agents
         private void Deselect(PlayerAgent agent)
         {
             if (agent != this)
-                IsCurrentlySelected = false;
+                Deselect();
+        }
+
+        public void Deselect()
+        {
+            IsCurrentlySelected = false;
         }
     }
 }
