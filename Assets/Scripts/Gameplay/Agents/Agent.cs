@@ -1,11 +1,10 @@
-using System;
 using UnityEngine;
-using UnityEngine.Serialization;
 using Random = UnityEngine.Random;
 
 namespace Gameplay.Agents
 {
-    // TODO refactor, optimize. WIP
+    // TODO refactor, optimize, clean up. WIP
+    // TODO extract movement & physics (collision detection) logic
     public abstract class Agent : MonoBehaviour
     {
         [Header("Movement")]
@@ -14,11 +13,9 @@ namespace Gameplay.Agents
         [SerializeField] protected float maxDirectionChangeTime = 3f;
 
         [SerializeField] protected LayerMask wallMask;
-        // [SerializeField] protected LayerMask agentMask;
         
         protected const float IdleChance = 0.2f;
 
-        // private LayerMask obstacleMask;
         protected Rigidbody2D _rb;
         protected Vector2 _currentDirection;
         protected float _timer;
@@ -39,7 +36,6 @@ namespace Gameplay.Agents
         protected virtual void Awake()
         {
             _rb = GetComponent<Rigidbody2D>();
-            // obstacleMask = wallMask | agentMask;
         }
 
         protected virtual void Start()
@@ -66,13 +62,6 @@ namespace Gameplay.Agents
 
         private void PickDirection()
         {
-            // if (Random.value < IdleChance)
-            //     _currentDirection = Vector2.zero;
-            // else
-            //     _currentDirection = MovementDirections[Random.Range(0, MovementDirections.Length)];
-            //
-            // _timer = Random.Range(minDirectionChangeTime, maxDirectionChangeTime);
-            
             // Idle check first
             if (Random.value < IdleChance)
             {

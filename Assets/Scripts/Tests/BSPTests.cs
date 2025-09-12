@@ -144,7 +144,6 @@ namespace Tests
         /// </summary>
         /// <param name="node">The node to start traversing the BSP tree from.</param>
         /// <returns>A list containing all leaf nodes in the BSP subtree rooted at this node.</returns>
-        //TODO is this the correct place for this method?
         public List<BSPNode> GetLeafNodes(BSPNode node)
         {
             List<BSPNode> leaves = new();

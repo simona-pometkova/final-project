@@ -1,6 +1,8 @@
+using System.Collections.Generic;
 using DungeonGeneration;
 using DungeonGeneration.BinarySpacePartitioning;
 using UnityEngine;
+using Utils;
 
 namespace Gameplay
 {
@@ -10,8 +12,8 @@ namespace Gameplay
     public class DungeonRenderer : MonoBehaviour
     {
         [Header("Prefabs")]
-        [SerializeField] private GameObject floorTilePrefab;
-        [SerializeField] private GameObject wallTilePrefab;
+        [SerializeField] private List<GameObject> floorTilePrefabs;
+        [SerializeField] private List<GameObject> wallTilePrefabs;
 
         [Header("Transforms")] 
         [SerializeField] private Transform roomsParent;
@@ -39,7 +41,7 @@ namespace Gameplay
 
                 // Create a GameObject for each floor tile of the room
                 foreach (Vector2Int tile in room.FloorTiles)
-                    CreateGameObject(floorTilePrefab, tile.x, tile.y, roomGameObject.transform);
+                    CreateGameObject(ChooseRandom(floorTilePrefabs), tile.x, tile.y, roomGameObject.transform);
             }
 
             // Iterate over dungeon and fill out 
@@ -47,9 +49,9 @@ namespace Gameplay
             for (int x = 0; x < dungeon.Width; x++)
                 for (int y = 0; y < dungeon.Height; y++)
                     if (dungeon.Grid[x, y] == 1 && _dungeonGameObject[x, y] == null)
-                        CreateGameObject(floorTilePrefab, x, y, corridorsParent);
+                        CreateGameObject(ChooseRandom(floorTilePrefabs), x, y, corridorsParent);
                     else if (dungeon.Grid[x, y] == 0)
-                        CreateGameObject(wallTilePrefab, x, y, wallsParent);
+                        CreateGameObject(ChooseRandom(wallTilePrefabs), x, y, wallsParent);
         }
 
         /// <summary>
@@ -66,5 +68,13 @@ namespace Gameplay
             GameObject go = Instantiate(prefab, position, Quaternion.identity, parent);
             _dungeonGameObject[positionX, positionY] = go;
         }
+        
+        /// <summary>
+        /// Choose a random prefab from list and return it.
+        /// </summary>
+        /// <param name="prefabs">The list of prefabs to choose from.</param>
+        /// <returns>A floor tile GameObject.</returns>
+        private GameObject ChooseRandom(List<GameObject> prefabs) => prefabs[Maths.GetRandomInt(0, prefabs.Count)];
+        
     }
 }

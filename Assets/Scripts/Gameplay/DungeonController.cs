@@ -1,7 +1,6 @@
 ﻿using DungeonGeneration;
-using DungeonGeneration.BinarySpacePartitioning;
-using Gameplay.Interactables;
-using System.Collections.Generic;
+using Gameplay.Agents;
+using Gameplay.Items;
 using UnityEngine;
 
 namespace Gameplay
@@ -20,13 +19,12 @@ namespace Gameplay
         [SerializeField] private int minNodeSize = 10;
         [SerializeField] private int maxNodeSize = 20;
 
-        [Header("Agents")]
-        [SerializeField] private Transform parent;
-        [SerializeField] private GameObject playerAgent;
-        [SerializeField] private GameObject enemyAgent;
-
         [Header("Renderer")]
-        [SerializeField] private DungeonRenderer renderer;
+        [SerializeField] private DungeonRenderer dungeonRenderer;
+
+        [Header("Controllers")] 
+        [SerializeField] private AgentsController agentsController;
+        [SerializeField] private ItemsController itemsController;
 
         private DungeonData _dungeon;
 
@@ -39,27 +37,13 @@ namespace Gameplay
             _dungeon = generator.Dungeon;
 
             // Render dungeon
-            renderer.DrawDungeon(_dungeon);
-
-            // TODO hard-code to spawn multiple agents
-            for (int i = 0; i < 10; i++)
-                SpawnAgents(_dungeon.Rooms);
-        }
-
-        // TODO extract agents logic into a separate class, i.e. AgentsController
-        private void SpawnAgents(List<Room> rooms)
-        {
-            Vector2Int spawnTile = rooms[0].FloorTiles[Random.Range(0, rooms[0].FloorTiles.Count)];
-            Vector3 spawnPosition = new Vector3(spawnTile.x, spawnTile.y, 0);
-            Instantiate(playerAgent, spawnPosition, Quaternion.identity, parent);
-        }
-
-        private void Update()
-        {
-            if (Input.GetKeyDown(KeyCode.E))
-            {
-                Object.FindFirstObjectByType<Torch>().Toggle();
-            }
+            dungeonRenderer.DrawDungeon(_dungeon);
+           
+            // Create agents
+            agentsController.SpawnAgents(_dungeon.Rooms);
+            
+            // Create items
+            itemsController.SpawnItems(_dungeon.Rooms);
         }
     }
 }
