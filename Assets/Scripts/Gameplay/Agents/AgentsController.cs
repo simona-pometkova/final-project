@@ -21,7 +21,7 @@ namespace Gameplay.Agents
         public void SpawnAgents(List<Room> rooms)
         {
             // hard-coded for now
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; i < 2; i++)
             {
                 SpawnAgent(rooms[Random.Range(0, rooms.Count)], playerAgent, playersParent);
                 SpawnAgent(rooms[Random.Range(0, rooms.Count)], enemyAgent, enemiesParent);

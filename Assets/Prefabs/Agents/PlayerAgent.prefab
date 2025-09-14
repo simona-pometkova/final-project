@@ -105,9 +105,8 @@ MonoBehaviour:
   moveSpeed: 5
   minDirectionChangeTime: 0.5
   maxDirectionChangeTime: 3
-  wallMask:
-    serializedVersion: 2
-    m_Bits: 8
+  rb: {fileID: 7410902013068324790}
+  idleChance: 0.2
 --- !u!58 &4754552489783552386
 CircleCollider2D:
   m_ObjectHideFlags: 0

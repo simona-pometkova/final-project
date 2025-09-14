@@ -1,13 +1,16 @@
-﻿using Gameplay.Agents;
+﻿using System.Collections.Generic;
+using Gameplay.Agents;
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
 
 namespace Gameplay.Items
 {
-    // TODO
+    // TODO add documentation
     public class Torch : MonoBehaviour
     {
         private static readonly int IsLit = Animator.StringToHash("IsLit");
+
+        public bool IsTorchLit => _isLit;
         
         [SerializeField] private Animator animator;
         [SerializeField] private Renderer lit;
@@ -23,42 +26,24 @@ namespace Gameplay.Items
         [SerializeField] private float flickerSpeed;
 
         private bool _isLit;
-        private PlayerAgent _nearbyPlayer;
+        private PlayerAgent _currentSelected;
+        private HashSet<PlayerAgent> _nearbyPlayers = new();
         
         private void Awake()
         {
-            InputController.OnInteractPressed += Toggle;
+            InputController.OnInteractPressed += TryPlayerToggle;
+            InputController.OnPlayerAgentClicked += HandleSelectionChanged;
         }
 
         private void Start()
         {
-            torchLight.enabled = false;
-            lit.enabled = false;
-            animator.SetBool(IsLit, false);
+            SetLit(false);
         }
 
         private void OnDestroy()
         {
-            InputController.OnInteractPressed -= Toggle;
-        }
-
-        // TODO this is messed up - nearby player check is incorrect
-        private void OnTriggerEnter2D(Collider2D other)
-        {
-            if (_isLit) return;
-            
-            _nearbyPlayer = other.GetComponent<PlayerAgent>();
-            
-            if (_nearbyPlayer != null && _nearbyPlayer.IsCurrentlySelected)
-                ShowFeedback(true);
-        }
-
-        private void OnTriggerExit2D(Collider2D other)
-        {
-            ShowFeedback(false);
-            
-            if (_nearbyPlayer != null && _nearbyPlayer.IsCurrentlySelected)
-                _nearbyPlayer = null;
+            InputController.OnInteractPressed -= TryPlayerToggle;
+            InputController.OnPlayerAgentClicked -= HandleSelectionChanged;
         }
 
         private void Update()
@@ -71,21 +56,60 @@ namespace Gameplay.Items
             }
         }
 
-        private void Toggle(bool isLit)
+        private void OnTriggerEnter2D(Collider2D other)
         {
-            if (_nearbyPlayer != null && _nearbyPlayer.IsCurrentlySelected)
-            {
-                _isLit = isLit;
+            Agent agent = other.GetComponent<Agent>();
+            if (!agent) return;
 
-                animator.SetBool(IsLit, isLit);
-                torchLight.enabled = isLit;
-                lit.enabled = isLit;
-                unlit.enabled = !isLit;
+            if (agent is PlayerAgent player)
+            {
+                _nearbyPlayers.Add(player);
+                UpdateFeedback();
             }
-            
-            if (_isLit) ShowFeedback(false);
+            else if (agent is EnemyAgent enemyAgent && _isLit)
+                if (Random.value < enemyAgent.ExtinguishTorchChance)
+                    SetLit(false);
         }
-        
-        private void ShowFeedback(bool show) => feedback.gameObject.SetActive(show);
+
+        private void OnTriggerExit2D(Collider2D other)
+        {
+            PlayerAgent player = other.GetComponent<PlayerAgent>();
+            if (player && _nearbyPlayers.Remove(player))
+                UpdateFeedback();
+        }
+
+        private void TryPlayerToggle()
+        {
+            if (_isLit) return;
+            if (_currentSelected && _nearbyPlayers.Contains(_currentSelected))
+                SetLit(true);
+        }
+
+        private void HandleSelectionChanged(PlayerAgent newSelection)
+        {
+            _currentSelected = newSelection;
+            UpdateFeedback();
+        }
+
+        private void SetLit(bool litState)
+        {
+            _isLit = litState;
+
+            animator.SetBool(IsLit, _isLit);
+            torchLight.enabled = _isLit;
+            lit.enabled = _isLit;
+            unlit.enabled = !_isLit;
+
+            UpdateFeedback();
+        }
+
+        private void UpdateFeedback()
+        {
+            bool show = !_isLit &&
+                        _currentSelected &&
+                        _nearbyPlayers.Contains(_currentSelected);
+
+            feedback.gameObject.SetActive(show);
+        }
     }
 }

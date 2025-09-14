@@ -4,10 +4,11 @@ using UnityEngine;
 
 namespace Gameplay
 {
+    // TODO add documentation
     public class InputController : MonoBehaviour
     {
         public static event Action<PlayerAgent> OnPlayerAgentClicked;
-        public static event Action<bool> OnInteractPressed;
+        public static event Action OnInteractPressed;
 
         [SerializeField] private LayerMask playerAgentLayer;
 
@@ -19,6 +20,7 @@ namespace Gameplay
             TrackKeys();
         }
 
+        // TODO this method is quite expensive. Is there a way to optimise it?
         private void TrackMouse()
         {
             if (Input.GetMouseButtonDown(0))
@@ -26,10 +28,10 @@ namespace Gameplay
                 Vector2 worldPosition = UnityEngine.Camera.main.ScreenToWorldPoint(Input.mousePosition);
                 Collider2D hit = Physics2D.OverlapPoint(worldPosition, playerAgentLayer);
 
-                if (hit != null)
+                if (hit)
                 {
                     PlayerAgent agent = hit.GetComponent<PlayerAgent>();
-                    if (agent != null && agent != _currentlySelectedAgent)
+                    if (agent && agent != _currentlySelectedAgent)
                     {
                         _currentlySelectedAgent?.ToggleSelected(false);
                         _currentlySelectedAgent = agent;
@@ -53,7 +55,7 @@ namespace Gameplay
             }
             
             if (Input.GetKeyDown(KeyCode.E)) 
-                OnInteractPressed?.Invoke(true);
+                OnInteractPressed?.Invoke();
         }
     }
 }

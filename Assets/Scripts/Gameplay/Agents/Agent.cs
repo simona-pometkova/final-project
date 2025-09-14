@@ -1,46 +1,23 @@
 using UnityEngine;
-using Random = UnityEngine.Random;
 
 namespace Gameplay.Agents
 {
-    // TODO refactor, optimize, clean up. WIP
-    // TODO extract movement & physics (collision detection) logic
+    // TODO documentation
     public abstract class Agent : MonoBehaviour
     {
         [Header("Movement")]
         [SerializeField] protected float moveSpeed = 5f;
         [SerializeField] protected float minDirectionChangeTime = 0.5f;
         [SerializeField] protected float maxDirectionChangeTime = 3f;
+        [SerializeField] protected Rigidbody2D rb;
+        [SerializeField] private float idleChance = 0.2f;
 
-        [SerializeField] protected LayerMask wallMask;
-        
-        protected const float IdleChance = 0.2f;
-
-        protected Rigidbody2D _rb;
         protected Vector2 _currentDirection;
-        protected float _timer;
-        protected float _wallCheckDistance = 1.5f;
-
-        protected static readonly Vector2[] MovementDirections =
-        {
-            Vector2.up,
-            Vector2.down,
-            Vector2.left,
-            Vector2.right,
-            (Vector2.up + Vector2.right).normalized,
-            (Vector2.down + Vector2.right).normalized,
-            (Vector2.down + Vector2.left).normalized,
-            (Vector2.up + Vector2.left).normalized,
-        };
-
-        protected virtual void Awake()
-        {
-            _rb = GetComponent<Rigidbody2D>();
-        }
-
+        private float _timer;
+        
         protected virtual void Start()
         {
-            PickDirection();
+            _currentDirection = Movement.PickRandomDirection(this, idleChance);
         }
 
         protected virtual void Update()
@@ -48,50 +25,21 @@ namespace Gameplay.Agents
             _timer -= Time.deltaTime;
             
             if (_timer <= 0f)
-                PickDirection();
+                SetNewDirection();
 
             if (_currentDirection != Vector2.zero)
             {
-                RaycastHit2D hit = Physics2D.Raycast(transform.position, _currentDirection, _wallCheckDistance, wallMask);
-                if (hit.collider != null /*&& hit.collider.gameObject != gameObject*/)
-                    PickDirection();
+                RaycastHit2D hit = Physics2D.Raycast(transform.position, _currentDirection, Movement.WallCheckDistance, Movement.WallMask);
+                if (hit.collider)
+                    SetNewDirection();
             }
 
-            _rb.linearVelocity = _currentDirection * moveSpeed;
+            Movement.MoveRigidbody(rb, _currentDirection, moveSpeed);
         }
 
-        private void PickDirection()
+        private void SetNewDirection()
         {
-            // Idle check first
-            if (Random.value < IdleChance)
-            {
-                _currentDirection = Vector2.zero;
-            }
-            else
-            {
-                // Build a list of valid directions
-                var validDirections = new System.Collections.Generic.List<Vector2>();
-
-                foreach (var dir in MovementDirections)
-                {
-                    RaycastHit2D hit = Physics2D.Raycast(transform.position, dir, _wallCheckDistance, wallMask);
-                    if (hit.collider == null /* || hit.collider.gameObject == gameObject */) // nothing blocking this direction
-                    {
-                        validDirections.Add(dir);
-                    }
-                }
-
-                if (validDirections.Count > 0)
-                {
-                    _currentDirection = validDirections[Random.Range(0, validDirections.Count)];
-                }
-                else
-                {
-                    // No free directions, stay idle
-                    _currentDirection = Vector2.zero;
-                }
-            }
-
+            _currentDirection = Movement.PickRandomDirection(this, idleChance);
             _timer = Random.Range(minDirectionChangeTime, maxDirectionChangeTime);
         }
     }

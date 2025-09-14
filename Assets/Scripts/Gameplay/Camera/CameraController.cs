@@ -18,7 +18,7 @@ namespace Gameplay.Camera
         [SerializeField] private float maxZoom = 20f;
 
         private UnityEngine.Camera _camera;
-        private PlayerAgent _targetAgent; // TODO
+        private PlayerAgent _targetAgent; 
 
         private void Awake()
         {
@@ -46,7 +46,7 @@ namespace Gameplay.Camera
         {
             Zoom();
             
-            if (_targetAgent != null)
+            if (_targetAgent)
                 TrackAgent();
             else 
                 FreeCameraMovement();
