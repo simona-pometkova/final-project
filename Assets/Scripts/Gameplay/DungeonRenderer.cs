@@ -62,7 +62,7 @@ namespace Gameplay
         /// <param name="positionX">The x-position to instantiate the GameObject on.</param>
         /// <param name="positionY">The y-position to instantiate the GameObject on.</param>
         /// <param name="parent">The parent of the GameObject.</param>
-        public void CreateGameObject(GameObject prefab, int positionX, int positionY, Transform parent)
+        private void CreateGameObject(GameObject prefab, int positionX, int positionY, Transform parent)
         {
             Vector3 position = new Vector3(positionX, positionY, 0);
             GameObject go = Instantiate(prefab, position, Quaternion.identity, parent);

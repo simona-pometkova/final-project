@@ -1,4 +1,6 @@
+using System;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace Gameplay.Agents
 {
@@ -14,6 +16,9 @@ namespace Gameplay.Agents
 
         protected Vector2 _currentDirection;
         private float _timer;
+        private bool _hasConverted;
+
+        public static event Action<Agent> OnAgentCollision;
         
         protected virtual void Start()
         {
@@ -41,6 +46,24 @@ namespace Gameplay.Agents
         {
             _currentDirection = Movement.PickRandomDirection(this, idleChance);
             _timer = Random.Range(minDirectionChangeTime, maxDirectionChangeTime);
+        }
+
+        private void OnCollisionEnter2D(Collision2D other)
+        {
+            var agent = other.gameObject.GetComponent<Agent>();
+
+            if (agent)
+            {
+                if (this is PlayerAgent && agent is EnemyAgent
+                    || this is EnemyAgent && agent is PlayerAgent)
+                {
+                    if (!_hasConverted)
+                    {
+                        OnAgentCollision?.Invoke(this);
+                        _hasConverted = true;
+                    }
+                }
+            }
         }
     }
 }

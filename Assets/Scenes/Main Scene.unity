@@ -774,10 +774,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ec68575288b0e8d4486c125494bbc68c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dungeonWidth: 30
-  dungeonHeight: 30
-  minNodeSize: 10
-  maxNodeSize: 20
+  dungeonWidth: 50
+  dungeonHeight: 50
+  minNodeSize: 15
+  maxNodeSize: 30
   dungeonRenderer: {fileID: 2108244033}
   agentsController: {fileID: 1060506768}
   itemsController: {fileID: 534789992}

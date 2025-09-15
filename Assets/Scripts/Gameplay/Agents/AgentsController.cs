@@ -17,11 +17,16 @@ namespace Gameplay.Agents
         private List<PlayerAgent> _playerAgents;
         private List<EnemyAgent> _enemyAgents;
         
+        private void Start()
+        {
+            Agent.OnAgentCollision += ConvertAgent;
+        }
+
         // TODO use level settings to determine how many agents to place
         public void SpawnAgents(List<Room> rooms)
         {
             // hard-coded for now
-            for (int i = 0; i < 2; i++)
+            for (int i = 0; i < 5; i++)
             {
                 SpawnAgent(rooms[Random.Range(0, rooms.Count)], playerAgent, playersParent);
                 SpawnAgent(rooms[Random.Range(0, rooms.Count)], enemyAgent, enemiesParent);
@@ -35,7 +40,16 @@ namespace Gameplay.Agents
             Vector3 spawnPosition = new Vector3(spawnTile.x, spawnTile.y, 0);
             Instantiate(prefab, spawnPosition, Quaternion.identity, parent);
         }
-        
-        public void ConvertAgent() {}
+
+        private void ConvertAgent(Agent agent)
+        {
+            Vector3 position = agent.transform.position;
+            Destroy(agent.gameObject);
+            
+            if (agent is PlayerAgent)
+                Instantiate(enemyAgent, position, Quaternion.identity, enemiesParent);
+            else if (agent is EnemyAgent)
+                Instantiate(playerAgent, position, Quaternion.identity, playersParent);
+        }
     }
 }
