@@ -29,6 +29,8 @@ namespace Gameplay
         /// <param name="dungeon">The dungeon data to use.</param>
         public void DrawDungeon(DungeonData dungeon)
         {
+            ClearDungeon();
+
             _dungeonGameObject = new GameObject[dungeon.Width, dungeon.Height];
 
             // First draw all room tiles
@@ -52,6 +54,25 @@ namespace Gameplay
                         CreateGameObject(ChooseRandom(floorTilePrefabs), x, y, corridorsParent);
                     else if (dungeon.Grid[x, y] == 0)
                         CreateGameObject(ChooseRandom(wallTilePrefabs), x, y, wallsParent);
+        }
+
+        /// <summary>
+        /// Clears the dungeon by destroying existing game objects.
+        /// Used for level progression and generating a new dungeon
+        /// for each level.
+        /// </summary>
+        private void ClearDungeon()
+        {
+            for (int i = roomsParent.childCount - 1; i >= 0; i--)
+                Destroy(roomsParent.GetChild(i).gameObject);
+
+            for (int i = corridorsParent.childCount - 1; i >= 0; i--)
+                Destroy(corridorsParent.GetChild(i).gameObject);
+
+            for (int i = wallsParent.childCount - 1; i >= 0; i--)
+                Destroy(wallsParent.GetChild(i).gameObject);
+
+            _dungeonGameObject = null;
         }
 
         /// <summary>

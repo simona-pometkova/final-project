@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Gameplay.Agents;
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
@@ -9,7 +10,7 @@ namespace Gameplay.Items
     public class Torch : MonoBehaviour
     {
         private static readonly int IsLit = Animator.StringToHash("IsLit");
-
+        public event Action OnLit;
         public bool IsTorchLit => _isLit;
         
         [SerializeField] private Animator animator;
@@ -67,7 +68,7 @@ namespace Gameplay.Items
                 UpdateFeedback();
             }
             else if (agent is EnemyAgent enemyAgent && _isLit)
-                if (Random.value < enemyAgent.ExtinguishTorchChance)
+                if (UnityEngine.Random.value < enemyAgent.ExtinguishTorchChance)
                     SetLit(false);
         }
 
@@ -94,6 +95,8 @@ namespace Gameplay.Items
         private void SetLit(bool litState)
         {
             _isLit = litState;
+
+            if (_isLit) OnLit?.Invoke();
 
             animator.SetBool(IsLit, _isLit);
             torchLight.enabled = _isLit;

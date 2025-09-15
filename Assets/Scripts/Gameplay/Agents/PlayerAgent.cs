@@ -7,7 +7,6 @@ namespace Gameplay.Agents
     {
         private bool _isCurrentlySelected;
         public void ToggleSelected(bool selected) => _isCurrentlySelected = selected;
-
         protected override void Update()
         {
             if (_isCurrentlySelected)

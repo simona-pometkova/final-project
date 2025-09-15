@@ -1,6 +1,7 @@
 ﻿using DungeonGeneration;
 using Gameplay.Agents;
 using Gameplay.Items;
+using Gameplay.Levels;
 using UnityEngine;
 
 namespace Gameplay
@@ -11,14 +12,6 @@ namespace Gameplay
     /// </summary>
     public class DungeonController : MonoBehaviour
     {
-        [Header("Dungeon Size")]
-        [SerializeField] private int dungeonWidth = 50;
-        [SerializeField] private int dungeonHeight = 50;
-
-        [Header("Node & Room Settings")]
-        [SerializeField] private int minNodeSize = 10;
-        [SerializeField] private int maxNodeSize = 20;
-
         [Header("Renderer")]
         [SerializeField] private DungeonRenderer dungeonRenderer;
 
@@ -28,22 +21,33 @@ namespace Gameplay
 
         private DungeonData _dungeon;
 
-        private void Start()
+        public void LoadLevel(LevelData level)
         {
             // Generate dungeon
-            DungeonGenerator generator = new DungeonGenerator(dungeonWidth, dungeonHeight, minNodeSize, maxNodeSize);
-            generator.GenerateDungeon();
+            DungeonGenerator generator = new DungeonGenerator(
+                    level.DungeonWidth,
+                    level.DungeonHeight,
+                    level.MinNodeSize,
+                    level.MaxNodeSize
+                );
 
+            generator.GenerateDungeon();
             _dungeon = generator.Dungeon;
 
             // Render dungeon
             dungeonRenderer.DrawDungeon(_dungeon);
-           
+
+            // Move camera to center of dungeon
+            float centerX = level.DungeonWidth / 2;
+            float centerY = level.DungeonHeight / 2;
+
+            UnityEngine.Camera.main.transform.position = new Vector3(centerX, centerY, UnityEngine.Camera.main.transform.position.z);
+
             // Create agents
-            agentsController.SpawnAgents(_dungeon.Rooms);
-            
+            agentsController.SpawnAgents(_dungeon.Rooms, level);
+
             // Create items
-            itemsController.SpawnItems(_dungeon.Rooms);
+            itemsController.SpawnItems(_dungeon.Rooms, level);
         }
     }
 }

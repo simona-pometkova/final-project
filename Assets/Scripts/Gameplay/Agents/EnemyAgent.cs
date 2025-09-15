@@ -7,17 +7,25 @@ namespace Gameplay.Agents
     public class EnemyAgent : Agent
     {
         public float ExtinguishTorchChance => extinguishTorchChance;
-        
-        [Header("Enemy Behaviour")]
-        [SerializeField] private float extinguishTorchChance = 0.3f;
-        [SerializeField] private float lookForTorchChance = 0.2f;
-        [SerializeField] private float arrivalDistance = 1f;
-        [SerializeField] private float searchRadius = 3f;
-        [SerializeField] private float torchCheckInterval = 5f;
 
+        // Stats
+        public float extinguishTorchChance;
+        public float lookForTorchChance;
+        public float searchRadius;
+        public float torchCheckInterval;
+
+        private float arrivalDistance = 1f;
         private Torch _targetTorch;
         private float _torchCheckTimer;
-        
+
+        public void InitializeEnemy(float extinguishTorchChance, float lookForTorchChance, float torchCheckInterval, float searchRadius)
+        {
+            this.extinguishTorchChance = extinguishTorchChance;
+            this.lookForTorchChance = lookForTorchChance;
+            this.torchCheckInterval = torchCheckInterval;
+            this.searchRadius = searchRadius;
+        }
+
         protected override void Update()
         {
             _torchCheckTimer -= Time.deltaTime;

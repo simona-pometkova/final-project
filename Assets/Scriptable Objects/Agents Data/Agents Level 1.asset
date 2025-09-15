@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2d0c921a96513de42abf86eeac7b95a2, type: 3}
+  m_Name: Agents Level 1
+  m_EditorClassIdentifier: 
+  moveSpeedMin: 2
+  moveSpeedMax: 4
+  minDirectionChangeTime: 2
+  maxDirecionChangeTime: 6
+  idleChanceMin: 0.1
+  idleChanceMax: 0.8
+  extinguishTorchChanceMin: 0.1
+  extinguishTorchChanceMax: 0.3
+  lookForTorchChanceMin: 0.1
+  lookForTorchChanceMax: 0.2
+  torchCheckIntervalMin: 5
+  torchCheckIntervalMax: 10
+  searchRadiusMin: 3
+  searchRadiusMax: 5

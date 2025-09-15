@@ -108,6 +108,8 @@ MonoBehaviour:
   rb: {fileID: 7410902013068324790}
   idleChance: 0.2
   extinguishTorchChance: 0.3
+  lookForTorchChance: 0.2
+  arrivalDistance: 1
   searchRadius: 10
   torchCheckInterval: 1
 --- !u!58 &4754552489783552386

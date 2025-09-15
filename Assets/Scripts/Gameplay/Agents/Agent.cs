@@ -7,22 +7,29 @@ namespace Gameplay.Agents
     // TODO documentation
     public abstract class Agent : MonoBehaviour
     {
-        [Header("Movement")]
-        [SerializeField] protected float moveSpeed = 5f;
-        [SerializeField] protected float minDirectionChangeTime = 0.5f;
-        [SerializeField] protected float maxDirectionChangeTime = 3f;
+        public bool HasConverted { get; private set; }
+
+        public static event Action<Agent, Agent> OnAgentCollision;
+
         [SerializeField] protected Rigidbody2D rb;
-        [SerializeField] private float idleChance = 0.2f;
+
+        // Stats
+        public float moveSpeed;
+        public float minDirectionChangeTime;
+        public float maxDirectionChangeTime;
+        public float idleChance;
 
         protected Vector2 _currentDirection;
         private float _timer;
-        private bool _hasConverted;
 
-        public static event Action<Agent> OnAgentCollision;
-        
-        protected virtual void Start()
+        public void Initialize(float moveSpeed, float minDirectionChangeTime, float maxDirectionChangeTime, float idleChance)
         {
-            _currentDirection = Movement.PickRandomDirection(this, idleChance);
+            this.moveSpeed = moveSpeed;
+            this.minDirectionChangeTime = minDirectionChangeTime;
+            this.maxDirectionChangeTime = maxDirectionChangeTime;
+            this.idleChance = idleChance;
+
+            SetNewDirection();
         }
 
         protected virtual void Update()
@@ -50,20 +57,22 @@ namespace Gameplay.Agents
 
         private void OnCollisionEnter2D(Collision2D other)
         {
-            var agent = other.gameObject.GetComponent<Agent>();
+            if (HasConverted) return;
 
-            if (agent)
-            {
-                if (this is PlayerAgent && agent is EnemyAgent
-                    || this is EnemyAgent && agent is PlayerAgent)
-                {
-                    if (!_hasConverted)
-                    {
-                        OnAgentCollision?.Invoke(this);
-                        _hasConverted = true;
-                    }
-                }
-            }
+            Agent otherAgent = other.gameObject.GetComponent<Agent>();
+
+            if (!otherAgent || otherAgent.HasConverted) return;
+
+            bool crossTeam = (this is PlayerAgent && otherAgent is EnemyAgent) ||
+                             (this is EnemyAgent && otherAgent is PlayerAgent);
+
+            if (crossTeam)
+                OnAgentCollision?.Invoke(this, otherAgent);
+        }
+
+        public void SetConverted(bool converted)
+        {
+            HasConverted = converted;
         }
     }
 }
