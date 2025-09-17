@@ -7,6 +7,7 @@ using UnityEngine.UI;
 
 namespace Gameplay.UI
 {
+    // TODO documentation
     public class FadeScreen : MonoBehaviour
     {
         public GameObject MainMenu => mainMenu;

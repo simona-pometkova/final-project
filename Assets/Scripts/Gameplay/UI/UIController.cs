@@ -9,6 +9,7 @@ using Gameplay.Levels;
 
 namespace Gameplay.UI
 {
+    // TODO documentation
     public class UIController : MonoBehaviour
     {
         [SerializeField] private FadeScreen fadeScreen;
@@ -83,6 +84,5 @@ namespace Gameplay.UI
             playersCounter.text = $"<color=#1667ff>Players: {playersCount}</color>";
             enemiesCounter.text = $"<color=#fe0000>Enemies: {enemiesCount}</color>";
         }
-
     }
 }

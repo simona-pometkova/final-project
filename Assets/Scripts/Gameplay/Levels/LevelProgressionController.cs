@@ -8,6 +8,7 @@ using UnityEngine;
 
 namespace Gameplay.Levels
 {
+    // TODO documentation
     public class LevelProgressionController : MonoBehaviour
     {
         public static event Action<bool> OnLevelCompleted;
@@ -83,8 +84,5 @@ namespace Gameplay.Levels
             OnLevelCompleted?.Invoke(false);
             fadeScreen.FadeToBlack(screen);
         }
-
-
-        
     }
 }

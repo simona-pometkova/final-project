@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2d0c921a96513de42abf86eeac7b95a2, type: 3}
   m_Name: Agents Level 1
   m_EditorClassIdentifier: 
-  moveSpeedMin: 2
-  moveSpeedMax: 4
+  moveSpeedMin: 4
+  moveSpeedMax: 6
   minDirectionChangeTime: 2
   maxDirecionChangeTime: 6
   idleChanceMin: 0.1
