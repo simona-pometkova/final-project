@@ -6,7 +6,6 @@ using Random = UnityEngine.Random;
 
 namespace Gameplay.Agents
 {
-    // TODO
     public class AgentsController : MonoBehaviour
     {
         [Header("Prefabs & Parents")]
@@ -14,10 +13,14 @@ namespace Gameplay.Agents
         [SerializeField] private GameObject enemyAgent;
         [SerializeField] private Transform playersParent;
         [SerializeField] private Transform enemiesParent;
+
+        [Header("Conversion settings")]
         [SerializeField] private float randomConversionChance = 0.3f;
-        
+        [SerializeField] private float radius = 1f;
+
         private List<PlayerAgent> _playerAgents = new();
         private List<EnemyAgent> _enemyAgents = new();
+        private AgentData _agentData;
 
         private void Awake()
         {
@@ -32,12 +35,13 @@ namespace Gameplay.Agents
         public void SpawnAgents(List<Room> rooms, LevelData level)
         {
             ClearAgents();
+            _agentData = level.AgentData;
 
             for (int i = 0; i < level.PlayerAgentsCount; i++)
-                SpawnAgent(rooms[Random.Range(0, rooms.Count)], playerAgent, playersParent, level.AgentData);
+                SpawnAgent(rooms[Random.Range(0, rooms.Count)], playerAgent, playersParent);
 
             for (int i = 0; i < level.EnemyAgentsCount; i++)
-                SpawnAgent(rooms[Random.Range(0, rooms.Count)], enemyAgent, enemiesParent, level.AgentData);
+                SpawnAgent(rooms[Random.Range(0, rooms.Count)], enemyAgent, enemiesParent);
         }
 
         private void ClearAgents()
@@ -50,28 +54,22 @@ namespace Gameplay.Agents
         }
 
         // TODO more sophisticated placement algorithm 
-        private void SpawnAgent(Room room, GameObject prefab, Transform parent, AgentData data)
+        private void SpawnAgent(Room room, GameObject prefab, Transform parent)
         {
             Vector2Int spawnTile = room.FloorTiles[Random.Range(0, room.FloorTiles.Count)];
             Vector3 spawnPosition = new Vector3(spawnTile.x, spawnTile.y, 0);
-            GameObject go = Instantiate(prefab, spawnPosition, Quaternion.identity, parent);
+            SpawnAgentAtPosition(spawnPosition, prefab, parent);
+        }
+
+        private void SpawnAgentAtPosition(Vector3 position, GameObject prefab, Transform parent)
+        {
+            GameObject go = Instantiate(prefab, position, Quaternion.identity, parent);
 
             Agent agent = go.GetComponent<Agent>();
-            data.RandomizeMovementStats(out float moveSpeed,
-                                        out float minDirectionChangeTime,
-                                        out float maxDirectionChangeTime,
-                                        out float idleChance);
-            agent.Initialize(moveSpeed, minDirectionChangeTime, maxDirectionChangeTime, idleChance);
+            agent.Initialize(_agentData);  
 
             if (agent is EnemyAgent enemy)
-            {
-                data.RandomizeEnemyStats(out float extinguishTorchChance,
-                                         out float lookForTorchChance,
-                                         out float torchCheckInterval,
-                                         out float searchRadius);
-                enemy.InitializeEnemy(extinguishTorchChance, lookForTorchChance, torchCheckInterval, searchRadius);
                 _enemyAgents.Add(enemy);
-            }
             else
                 _playerAgents.Add(agent as PlayerAgent);
         }
@@ -88,7 +86,6 @@ namespace Gameplay.Agents
                 return;
             }
 
-            // TODO - should I have random chance conversion at all?
             if (Random.value < randomConversionChance)
             {
                 Agent victim = Random.value < 0.5f ? agentA : agentB;
@@ -120,7 +117,7 @@ namespace Gameplay.Agents
 
         private int CountNearbyOpponents(Agent agent)
         {
-            float radius = 1f;
+            
             Collider2D[] hits = Physics2D.OverlapCircleAll(agent.transform.position, radius);
             int count = 0;
 
@@ -145,12 +142,11 @@ namespace Gameplay.Agents
 
             Vector3 position = agent.transform.position;
             Destroy(agent.gameObject);
-            
-            // TODO When converting, stats need to be randomized as well
+
             if (agent is PlayerAgent)
-                Instantiate(enemyAgent, position, Quaternion.identity, enemiesParent);
+                SpawnAgentAtPosition(position, enemyAgent, enemiesParent);
             else if (agent is EnemyAgent)
-                Instantiate(playerAgent, position, Quaternion.identity, playersParent);
+                SpawnAgentAtPosition(position, playerAgent, playersParent);
         }
     }
 }

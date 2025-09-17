@@ -1,4 +1,5 @@
 using Gameplay.Items;
+using System.Data.Common;
 using UnityEngine;
 
 namespace Gameplay.Agents
@@ -9,21 +10,23 @@ namespace Gameplay.Agents
         public float ExtinguishTorchChance => extinguishTorchChance;
 
         // Stats
-        public float extinguishTorchChance;
-        public float lookForTorchChance;
-        public float searchRadius;
-        public float torchCheckInterval;
+        [Header("Behavior")]
+        [SerializeField] private float extinguishTorchChance;
+        [SerializeField] private float lookForTorchChance;
+        [SerializeField] private float searchRadius;
+        [SerializeField] private float torchCheckInterval;
 
         private float arrivalDistance = 1f;
         private Torch _targetTorch;
         private float _torchCheckTimer;
 
-        public void InitializeEnemy(float extinguishTorchChance, float lookForTorchChance, float torchCheckInterval, float searchRadius)
+        public override void Initialize(AgentData data)
         {
-            this.extinguishTorchChance = extinguishTorchChance;
-            this.lookForTorchChance = lookForTorchChance;
-            this.torchCheckInterval = torchCheckInterval;
-            this.searchRadius = searchRadius;
+            base.Initialize(data);
+            data.RandomizeEnemyStats(out extinguishTorchChance,
+                out lookForTorchChance,
+                out torchCheckInterval,
+                out searchRadius);
         }
 
         protected override void Update()

@@ -13,21 +13,21 @@ namespace Gameplay.Agents
 
         [SerializeField] protected Rigidbody2D rb;
 
-        // Stats
-        public float moveSpeed;
-        public float minDirectionChangeTime;
-        public float maxDirectionChangeTime;
-        public float idleChance;
+        [Header("Movement")]
+        [SerializeField] protected float moveSpeed;
+        [SerializeField] protected float minDirectionChangeTime;
+        [SerializeField] protected float maxDirectionChangeTime;
+        [SerializeField] protected float idleChance;
 
         protected Vector2 _currentDirection;
         private float _timer;
 
-        public void Initialize(float moveSpeed, float minDirectionChangeTime, float maxDirectionChangeTime, float idleChance)
+        public virtual void Initialize(AgentData data)
         {
-            this.moveSpeed = moveSpeed;
-            this.minDirectionChangeTime = minDirectionChangeTime;
-            this.maxDirectionChangeTime = maxDirectionChangeTime;
-            this.idleChance = idleChance;
+            data.RandomizeMovementStats(out moveSpeed, 
+                out minDirectionChangeTime,
+                out maxDirectionChangeTime, 
+                out idleChance);
 
             SetNewDirection();
         }
