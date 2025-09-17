@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using DungeonGeneration.BinarySpacePartitioning;
 using Gameplay.Levels;
@@ -8,6 +9,9 @@ namespace Gameplay.Agents
 {
     public class AgentsController : MonoBehaviour
     {
+        public static event Action<List<PlayerAgent>, List<EnemyAgent>> OnAgentsSpawned;
+        public static event Action<int, int> OnAgentConverted;
+
         [Header("Prefabs & Parents")]
         [SerializeField] private GameObject playerAgent;
         [SerializeField] private GameObject enemyAgent;
@@ -42,10 +46,15 @@ namespace Gameplay.Agents
 
             for (int i = 0; i < level.EnemyAgentsCount; i++)
                 SpawnAgent(rooms[Random.Range(0, rooms.Count)], enemyAgent, enemiesParent);
+
+            OnAgentsSpawned?.Invoke(_playerAgents, _enemyAgents);
         }
 
         private void ClearAgents()
         {
+            _playerAgents.Clear();
+            _enemyAgents.Clear();
+
             for (int i = playersParent.childCount - 1; i >= 0; i--)
                 Destroy(playersParent.GetChild(i).gameObject);
 
@@ -144,9 +153,17 @@ namespace Gameplay.Agents
             Destroy(agent.gameObject);
 
             if (agent is PlayerAgent)
+            {
+                _playerAgents.Remove(agent as PlayerAgent);
                 SpawnAgentAtPosition(position, enemyAgent, enemiesParent);
+            }
             else if (agent is EnemyAgent)
+            {
+                _enemyAgents.Remove(agent as EnemyAgent);
                 SpawnAgentAtPosition(position, playerAgent, playersParent);
+            }
+
+            OnAgentConverted?.Invoke(_playerAgents.Count, _enemyAgents.Count);
         }
     }
 }

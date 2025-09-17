@@ -2,6 +2,7 @@
 using Gameplay.Agents;
 using Gameplay.Items;
 using Gameplay.Levels;
+using System;
 using UnityEngine;
 
 namespace Gameplay
@@ -12,6 +13,8 @@ namespace Gameplay
     /// </summary>
     public class DungeonController : MonoBehaviour
     {
+        public static event Action<bool> OnLevelLoaded;
+
         [Header("Renderer")]
         [SerializeField] private DungeonRenderer dungeonRenderer;
 
@@ -48,6 +51,8 @@ namespace Gameplay
 
             // Create items
             itemsController.SpawnItems(_dungeon.Rooms, level);
+
+            OnLevelLoaded?.Invoke(true);
         }
     }
 }

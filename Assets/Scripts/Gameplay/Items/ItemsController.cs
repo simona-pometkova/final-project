@@ -9,6 +9,7 @@ namespace Gameplay.Items
     public class ItemsController : MonoBehaviour
     {
         public static event Action OnAllTorchesLit;
+        public static event Action<List<Torch>> OnTorchesSpawned;
 
         [Header("Prefabs & Parents")]
         [SerializeField] private GameObject torchPrefab;
@@ -23,10 +24,14 @@ namespace Gameplay.Items
             foreach (Room room in rooms)
                 for (int i = 0; i < level.TorchesPerRoom; i++)
                     SpawnTorch(room, torchPrefab, itemsParent);
+
+            OnTorchesSpawned?.Invoke(_torches);
         }
 
         private void ClearItems()
         {
+            _torches.Clear();
+
             for (int i = itemsParent.childCount - 1; i >= 0; i--)
                 Destroy(itemsParent.GetChild(i).gameObject);
         }

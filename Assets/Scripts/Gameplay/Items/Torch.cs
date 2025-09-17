@@ -11,6 +11,7 @@ namespace Gameplay.Items
     {
         private static readonly int IsLit = Animator.StringToHash("IsLit");
         public event Action OnLit;
+        public static event Action OnStateChanged;
         public bool IsTorchLit => _isLit;
         
         [SerializeField] private Animator animator;
@@ -29,16 +30,16 @@ namespace Gameplay.Items
         private bool _isLit;
         private PlayerAgent _currentSelected;
         private HashSet<PlayerAgent> _nearbyPlayers = new();
-        
+
+        private void Start()
+        {
+            SetLit(false, false);
+        }
+
         private void Awake()
         {
             InputController.OnInteractPressed += TryPlayerToggle;
             InputController.OnPlayerAgentClicked += HandleSelectionChanged;
-        }
-
-        private void Start()
-        {
-            SetLit(false);
         }
 
         private void OnDestroy()
@@ -92,9 +93,12 @@ namespace Gameplay.Items
             UpdateFeedback();
         }
 
-        private void SetLit(bool litState)
+        private void SetLit(bool litState, bool invoke = true)
         {
             _isLit = litState;
+
+            if (invoke)
+                OnStateChanged?.Invoke();
 
             if (_isLit) OnLit?.Invoke();
 

@@ -9,6 +9,7 @@ namespace Gameplay
     {
         public static event Action<PlayerAgent> OnPlayerAgentClicked;
         public static event Action OnInteractPressed;
+        public static event Action OnQuitPressed;
 
         [SerializeField] private LayerMask playerAgentLayer;
 
@@ -56,6 +57,9 @@ namespace Gameplay
             
             if (Input.GetKeyDown(KeyCode.E)) 
                 OnInteractPressed?.Invoke();
+
+            if (Input.GetKeyDown(KeyCode.Q))
+                OnQuitPressed?.Invoke();
         }
     }
 }
