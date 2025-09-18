@@ -11,7 +11,7 @@ namespace Gameplay.Items
     {
         private static readonly int IsLit = Animator.StringToHash("IsLit");
         public event Action OnLit;
-        public static event Action OnStateChanged;
+        public static event Action<bool> OnStateChanged;
         public bool IsTorchLit => _isLit;
         
         [SerializeField] private Animator animator;
@@ -98,7 +98,7 @@ namespace Gameplay.Items
             _isLit = litState;
 
             if (invoke)
-                OnStateChanged?.Invoke();
+                OnStateChanged?.Invoke(_isLit);
 
             if (_isLit) OnLit?.Invoke();
 

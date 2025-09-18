@@ -11,6 +11,8 @@ namespace Gameplay.Agents
     {
         public static event Action<List<PlayerAgent>, List<EnemyAgent>> OnAgentsSpawned;
         public static event Action<int, int> OnAgentConverted;
+        public static event Action OnPlayerConverted;
+        public static event Action OnEnemyConverted;
 
         [Header("Prefabs & Parents")]
         [SerializeField] private GameObject playerAgent;
@@ -156,11 +158,13 @@ namespace Gameplay.Agents
             {
                 _playerAgents.Remove(agent as PlayerAgent);
                 SpawnAgentAtPosition(position, enemyAgent, enemiesParent);
+                OnPlayerConverted?.Invoke();
             }
             else if (agent is EnemyAgent)
             {
                 _enemyAgents.Remove(agent as EnemyAgent);
                 SpawnAgentAtPosition(position, playerAgent, playersParent);
+                OnEnemyConverted?.Invoke();
             }
 
             OnAgentConverted?.Invoke(_playerAgents.Count, _enemyAgents.Count);

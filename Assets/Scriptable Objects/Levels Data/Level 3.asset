@@ -16,7 +16,8 @@ MonoBehaviour:
   dungeonHeight: 80
   minNodeSize: 20
   maxNodeSize: 35
-  torchesPerRoom: 3
-  playerAgentsCount: 5
-  enemyAgentsCount: 5
+  torchesPerRoom: 4
+  minimumTorchDistance: 5
+  playerAgentsCount: 7
+  enemyAgentsCount: 7
   agentData: {fileID: 11400000, guid: 5a73490b0b7cd344ea590fad3a5cde88, type: 2}

@@ -18,11 +18,11 @@ MonoBehaviour:
   maxDirecionChangeTime: 14
   idleChanceMin: 0.1
   idleChanceMax: 0.4
-  extinguishTorchChanceMin: 0.5
-  extinguishTorchChanceMax: 0.7
-  lookForTorchChanceMin: 0.5
+  extinguishTorchChanceMin: 0.4
+  extinguishTorchChanceMax: 0.6
+  lookForTorchChanceMin: 0.4
   lookForTorchChanceMax: 0.7
-  torchCheckIntervalMin: 0.5
-  torchCheckIntervalMax: 4
+  torchCheckIntervalMin: 1
+  torchCheckIntervalMax: 5
   searchRadiusMin: 10
   searchRadiusMax: 15

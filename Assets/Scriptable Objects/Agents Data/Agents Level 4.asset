@@ -21,7 +21,7 @@ MonoBehaviour:
   extinguishTorchChanceMin: 0.4
   extinguishTorchChanceMax: 0.6
   lookForTorchChanceMin: 0.3
-  lookForTorchChanceMax: 0.5
+  lookForTorchChanceMax: 0.6
   torchCheckIntervalMin: 2
   torchCheckIntervalMax: 6
   searchRadiusMin: 8

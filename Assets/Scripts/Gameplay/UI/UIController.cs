@@ -68,7 +68,7 @@ namespace Gameplay.UI
             SetAgentCounters(_players.Count, _enemies.Count);
         }
 
-        private void SetTorchesCounter()
+        private void SetTorchesCounter(bool lit = true)
         {
             int litTorches = 0;
 

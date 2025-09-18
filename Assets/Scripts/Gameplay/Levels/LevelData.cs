@@ -11,6 +11,7 @@ namespace Gameplay.Levels
         public int MinNodeSize => minNodeSize;
         public int MaxNodeSize => maxNodeSize;
         public int TorchesPerRoom => torchesPerRoom;
+        public int MinimumTorchDistance => minimumTorchDistance;
         public int PlayerAgentsCount => playerAgentsCount;
         public int EnemyAgentsCount => enemyAgentsCount;
         public AgentData AgentData => agentData;
@@ -23,6 +24,8 @@ namespace Gameplay.Levels
 
         [Header("Item Settings")]
         [SerializeField] private int torchesPerRoom;
+
+        [SerializeField] private int minimumTorchDistance;
 
         [Header("Agent Settings")]
         [SerializeField] private int playerAgentsCount;
