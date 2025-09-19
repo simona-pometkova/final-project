@@ -3,6 +3,7 @@ using UnityEngine;
 
 namespace Gameplay.Levels
 {
+    // TODO documentation
     [CreateAssetMenu(fileName = "LevelData", menuName = "Game/Level Data")]
     public class LevelData : ScriptableObject
     {
@@ -24,7 +25,6 @@ namespace Gameplay.Levels
 
         [Header("Item Settings")]
         [SerializeField] private int torchesPerRoom;
-
         [SerializeField] private int minimumTorchDistance;
 
         [Header("Agent Settings")]

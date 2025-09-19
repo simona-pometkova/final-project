@@ -21,7 +21,6 @@ namespace Gameplay
             TrackKeys();
         }
 
-        // TODO this method is quite expensive. Is there a way to optimise it?
         private void TrackMouse()
         {
             if (Input.GetMouseButtonDown(0))

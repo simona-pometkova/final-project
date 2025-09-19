@@ -3,6 +3,7 @@ using Utils;
 
 namespace Gameplay.Agents
 {
+    // TODO documentation
     [CreateAssetMenu(fileName = "Agents Data", menuName = "Game/Agents Data")]
     public class AgentData : ScriptableObject
     {

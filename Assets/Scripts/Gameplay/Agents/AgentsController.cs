@@ -7,6 +7,7 @@ using Random = UnityEngine.Random;
 
 namespace Gameplay.Agents
 {
+    // TODO documentation
     public class AgentsController : MonoBehaviour
     {
         public static event Action<List<PlayerAgent>, List<EnemyAgent>> OnAgentsSpawned;
@@ -64,7 +65,6 @@ namespace Gameplay.Agents
                 Destroy(enemiesParent.GetChild(i).gameObject);
         }
 
-        // TODO more sophisticated placement algorithm 
         private void SpawnAgent(Room room, GameObject prefab, Transform parent)
         {
             Vector2Int spawnTile = room.FloorTiles[Random.Range(0, room.FloorTiles.Count)];

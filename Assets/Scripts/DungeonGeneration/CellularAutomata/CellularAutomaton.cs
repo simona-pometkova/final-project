@@ -10,7 +10,6 @@
     /// </summary>
     public static class CellularAutomaton
     {
-        // TODO extract all config values into a separate file and serialize them
         // Defines the probability that a given cell will be 
         // a floor (i.e. 1/alive) in the noise grid before smoothing
         // Density = % chance floor

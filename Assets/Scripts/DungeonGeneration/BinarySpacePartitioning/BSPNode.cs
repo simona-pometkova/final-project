@@ -18,8 +18,6 @@ namespace DungeonGeneration.BinarySpacePartitioning
         
         private Room _room;
 
-        // Configurable constants
-        // TODO export as Serializable fields
         private const int RoomEdgePadding = 1;
         private const int RoomSizeMargin = 2;
         private const float AspectRatioThreshold = 1.25f;
