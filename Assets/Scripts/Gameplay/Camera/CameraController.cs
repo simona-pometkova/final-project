@@ -35,6 +35,11 @@ namespace Gameplay.Camera
             InputController.OnPlayerAgentClicked -= FollowAgent;
         }
 
+        /// <summary>
+        /// Sets currently selected player agent and follows it.
+        /// If null, fallbacks to free camera movement.
+        /// </summary>
+        /// <param name="agent">A PlayerAgent to follow or null.</param>
         private void FollowAgent(PlayerAgent agent) => _targetAgent = agent;
 
         /// <summary>
@@ -52,7 +57,9 @@ namespace Gameplay.Camera
                 FreeCameraMovement();
         }
 
-        // TODO documentation
+        /// <summary>
+        /// Camera zoom in-out logic.
+        /// </summary>
         private void Zoom()
         {
             // Zoom camera with mouse scroll wheel
@@ -67,7 +74,9 @@ namespace Gameplay.Camera
             }
         }
 
-        // TODO documentation
+        /// <summary>
+        /// Follows the target agent if there exists one.
+        /// </summary>
         private void TrackAgent()
         {
             Vector3 targetPosition = _targetAgent.transform.position;
@@ -75,7 +84,10 @@ namespace Gameplay.Camera
             transform.position = Vector3.Lerp(transform.position, targetPosition, movementSpeed * Time.deltaTime);
         }
 
-        // TODO documentation
+        /// <summary>
+        /// Freely moves the camera using player input
+        /// if no agent is currently being controlled.
+        /// </summary>
         private void FreeCameraMovement()
         {
             // Camera movement

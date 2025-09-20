@@ -9,10 +9,12 @@ namespace Gameplay
 {
     /// <summary>
     /// Orchestrates dungeon generation, rendering
-    /// and main game loop.
+    /// and agents and items instantiation
+    /// depending on the current level specifications.
     /// </summary>
     public class DungeonController : MonoBehaviour
     {
+        // Used to notify the game that the level has been generated
         public static event Action<bool> OnLevelLoaded;
 
         [Header("Renderer")]
@@ -22,11 +24,18 @@ namespace Gameplay
         [SerializeField] private AgentsController agentsController;
         [SerializeField] private ItemsController itemsController;
 
+        // Cache the current dungeon data
         private DungeonData _dungeon;
 
+        /// <summary>
+        /// Loads a level using provided level specifications.
+        /// Generates a dungeon, draws it in Unity, and spawns
+        /// agents and items.
+        /// </summary>
+        /// <param name="level">The current level specifications.</param>
         public void LoadLevel(LevelData level)
         {
-            // Generate dungeon
+            // Generate dungeon and cache it
             DungeonGenerator generator = new DungeonGenerator(
                     level.DungeonWidth,
                     level.DungeonHeight,

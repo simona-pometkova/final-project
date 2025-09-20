@@ -3,7 +3,9 @@ using UnityEngine;
 
 namespace Gameplay.Levels
 {
-    // TODO documentation
+    /// <summary>
+    /// A configuration container for defining the parameters of a single game level.
+    /// </summary>
     [CreateAssetMenu(fileName = "LevelData", menuName = "Game/Level Data")]
     public class LevelData : ScriptableObject
     {

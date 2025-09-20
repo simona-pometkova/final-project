@@ -7,7 +7,7 @@ using Utils;
 namespace Gameplay
 {
     /// <summary>
-    /// Handles visualisation of dungeon data into Unity scene.
+    /// Handles visualisation of dungeon layout into Unity scene.
     /// </summary>
     public class DungeonRenderer : MonoBehaviour
     {

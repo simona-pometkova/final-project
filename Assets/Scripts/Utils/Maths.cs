@@ -5,7 +5,6 @@ namespace Utils
     /// <summary>
     /// A collection of mathematics formulas used throughout the codebase.
     /// </summary>
-    //TODO maybe some of these methods are overkills?
     public static class Maths
     {
         /// <summary>

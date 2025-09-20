@@ -3,7 +3,9 @@ using Utils;
 
 namespace Gameplay.Agents
 {
-    // TODO documentation
+    /// <summary>
+    /// A configurable data container for agent behavior and movement statistics.
+    /// </summary>
     [CreateAssetMenu(fileName = "Agents Data", menuName = "Game/Agents Data")]
     public class AgentData : ScriptableObject
     {
